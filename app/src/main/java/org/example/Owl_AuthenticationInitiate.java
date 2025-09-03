@@ -1,4 +1,4 @@
-package org.bouncycastle.crypto.agreement.Owl;
+package org.example;
 
 import org.bouncycastle.math.ec.ECPoint;
 
@@ -11,7 +11,7 @@ import org.bouncycastle.math.ec.ECPoint;
  * {@link Owl_Client#authenticationInitiate()}.
  * <p>
  */
-public class OWL_AuthenticationInitiate
+public class Owl_AuthenticationInitiate
 {
 
     /**
@@ -45,18 +45,18 @@ public class OWL_AuthenticationInitiate
      */
     private final ECSchnorrZKP knowledgeProofForX2;
 
-    public OWL_AuthenticationInitiate(
+    public Owl_AuthenticationInitiate(
         String clientId,
         ECPoint gx1,
         ECPoint gx2,
         ECSchnorrZKP knowledgeProofForX1,
         ECSchnorrZKP knowledgeProofForX2)
     {
-        OWL_Util.validateNotNull(clientId, "clientId");
-        OWL_Util.validateNotNull(gx1, "gx1");
-        OWL_Util.validateNotNull(gx2, "gx2");
-        OWL_Util.validateNotNull(knowledgeProofForX1, "knowledgeProofForX1");
-        OWL_Util.validateNotNull(knowledgeProofForX2, "knowledgeProofForX2");
+        Owl_Util.validateNotNull(clientId, "clientId");
+        Owl_Util.validateNotNull(gx1, "gx1");
+        Owl_Util.validateNotNull(gx2, "gx2");
+        Owl_Util.validateNotNull(knowledgeProofForX1, "knowledgeProofForX1");
+        Owl_Util.validateNotNull(knowledgeProofForX2, "knowledgeProofForX2");
 
         this.clientId = clientId;
         this.gx1 = gx1;

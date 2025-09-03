@@ -1,4 +1,6 @@
-package org.bouncycastle.crypto.agreement.Owl;
+package org.example;
+
+import java.math.BigInteger;
 
 import org.bouncycastle.math.ec.ECPoint;
 
@@ -28,7 +30,7 @@ public class Owl_InitialRegistration
     /**
      * The value of T = g^t
      */
-    private final ECPoint gt
+    private final ECPoint gt;
 
 
 

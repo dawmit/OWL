@@ -1,4 +1,4 @@
-package org.bouncycastle.crypto.agreement.Owl;
+package org.example;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -179,13 +179,29 @@ public class Owl_Client
      * Client's alpha
      */
     private ECPoint alpha;
+    /**
+     * ECSchnorrZKP knowledge proof for x1, using {@link ECSchnorrZKP}
+     */
+    private ECSchnorrZKP knowledgeProofForX1;
+    /**
+     * ECSchnorrZKP knowledge proof for x2, using {@link ECSchnorrZKP}
+     */
+    private ECSchnorrZKP knowledgeProofForX2;
+    /**
+     * ECSchnorrZKP knowledge proof for x3, using {@link ECSchnorrZKP}
+     */
+    private ECSchnorrZKP knowledgeProofForX3;
+    /**
+     * ECSchnorrZKP knowledge proof for x4, using {@link ECSchnorrZKP}
+     */
+    private ECSchnorrZKP knowledgeProofForX4;
 
     /**
      * Convenience constructor for a new {@link Owl_Client} that uses
      * the {@link Owl_Curves#NIST_P256} elliptic curve,
      * a SHA-256 digest, and a default {@link SecureRandom} implementation.
      * <p>
-     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALIZED}.
+     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALISED}.
      *
      * @param clientId unique identifier of this client.
      *                      The server and client in the exchange must NOT share the same id.
@@ -209,7 +225,7 @@ public class Owl_Client
      * Convenience constructor for a new {@link Owl_Client} that uses
      * a SHA-256 digest and a default {@link SecureRandom} implementation.
      * <p>
-     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALIZED}.
+     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALISED}.
      *
      * @param clientId unique identifier of this client..
      *                      The server and client in the exchange must NOT share the same id.     
@@ -237,7 +253,7 @@ public class Owl_Client
     /**
      * Construct a new {@link Owl_Client}.
      * <p>
-     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALIZED}.
+     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALISED}.
      *
      * @param clientId unique identifier of this client.
      *                      The server and client in the exchange must NOT share the same id.
@@ -293,7 +309,7 @@ public class Owl_Client
         this.digest = digest;
         this.random = random;
 
-        this.state = STATE_INITIALIZED;
+        this.state = STATE_INITIALISED;
         this.registrationState = REGISTRATION_NOT_CALLED;
     }
 
@@ -311,7 +327,7 @@ public class Owl_Client
      * I.E. whether or not this server has registered a user already.
      * See the <tt>REGSITRATION_*</tt> constants for possible values.
      */
-    public int getRegistrationState()
+    public boolean getRegistrationState()
     {
         return this.registrationState;
     }
@@ -323,15 +339,15 @@ public class Owl_Client
      * Must be called prior to {@link #registerUseronServer(Owl_InitialRegistration)}
      * @throws IllegalStateException if this function is called more than once
      */
-    public Owl_InitialRegistration initiateUserRegistration()
+    public Owl_InitialRegistration initiateUserRegistration(String username, char[] password)
     {
         if(this.registrationState)
         {
             throw new IllegalStateException("User login registration already begun by "+ clientId);
         }
-        BigInteger t = calculateT();
+        BigInteger t = calculateT(username, password);
 
-        BigInteger pi = Owl_Util.caculatePi(t);
+        BigInteger pi = Owl_Util.calculatePi(n,t,digest);
 
         ECPoint gt = Owl_Util.calculateGx(g, t);
 
@@ -356,7 +372,7 @@ public class Owl_Client
         }
         this.t = calculateT();
 
-        this.pi = Owl_Util.caculatePi(t);
+        this.pi = Owl_Util.calculatePi(n,t, digest);
 
         this.x1 = Owl_Util.generateX1(n, random);
         this.x2 = Owl_Util.generateX1(n, random);
@@ -364,8 +380,8 @@ public class Owl_Client
         this.gx1 = Owl_Util.calculateGx(g, x1);
         this.gx2 = Owl_Util.calculateGx(g, x2);
 
-        ECSchnorrZKP knowledgeProofForX1 = Owl_Util.calculateZeroknowledgeProof(g, n, x1, gx1, digest, clientId, random);
-        ECSchnorrZKP knowledgeProofForX2 = Owl_Util.calculateZeroknowledgeProof(g, n, x2, gx2, digest, clientId, random);
+        this.knowledgeProofForX1 = Owl_Util.calculateZeroknowledgeProof(g, n, x1, gx1, digest, clientId, random);
+        this.knowledgeProofForX2 = Owl_Util.calculateZeroknowledgeProof(g, n, x2, gx2, digest, clientId, random);
 
         this.state = STATE_LOGIN_INITIALISED;
 
@@ -388,33 +404,37 @@ public class Owl_Client
     {
         if (this.state >= STATE_LOGIN_FINISHED)
         {
-            throw new IllegalStateException("Validation already attempted for round1 payload for" + clientId);
+            throw new IllegalStateException("Login authentication already finished for this client: " + clientId);
+        }
+        if (this.state < STATE_LOGIN_INITIALISED)
+        {
+            throw new IllegalStateException("Must initialise login authetnication before calling authentication finish for: " + clientId);
         }
         this.serverId = authenticationServerResponse.getServerId();
         this.gx3 = authenticationServerResponse.getGx3();
         this.gx4 = authenticationServerResponse.getGx4();
         ECPoint beta = authenticationServerResponse.getBeta();
-        ECSchnorrZKP knowledgeProofForX3 = authenticationServerResponse.getknowledgeProofForX3();
-        ECSchnorrZKP knowledgeProofForX4 = authenticationServerResponse.getknowledgeProofForX4();
-        ECSchnorrZKP knowledgeProofForBeta = authenticationServerResponse.getknowledgeProofForBeta();
+        ECSchnorrZKP knowledgeProofForX3 = authenticationServerResponse.getKnowledgeProofForX3();
+        ECSchnorrZKP knowledgeProofForX4 = authenticationServerResponse.getKnowledgeProofForX4();
+        ECSchnorrZKP knowledgeProofForBeta = authenticationServerResponse.getKnowledgeProofForBeta();
 
-        ECPoint betaG = calculateGA(gx1, gx2, gx3);
+        ECPoint betaG = Owl_Util.calculateGA(gx1, gx2, gx3);
 
-        Owl_Util.validateclientIdsDiffer(clientId, authenticationServerResponse.getServerId());
-        Owl_Util.validateZeroknowledgeProof(g, gx3, knowledgeProofForX3, q, n, ecCurve, h, authenticationServerResponse.serverId(), digest);
-        Owl_Util.validateZeroknowledgeProof(g, gx4, knowledgeProofForX4, q, n, ecCurve, h, authenticationServerResponse.serverId(), digest);
-        Owl_Util.validateZeroknowledgeProof(betaG, beta, knowledgeProofForBeta, q, n, ecCurve, h, authenticationServerResponse.serverId(), digest);
+        Owl_Util.validateParticipantIdsDiffer(clientId, authenticationServerResponse.getServerId());
+        Owl_Util.validateZeroknowledgeProof(g, gx3, knowledgeProofForX3, q, n, ecCurve, h, authenticationServerResponse.getServerId(), digest);
+        Owl_Util.validateZeroknowledgeProof(g, gx4, knowledgeProofForX4, q, n, ecCurve, h, authenticationServerResponse.getServerId(), digest);
+        Owl_Util.validateZeroknowledgeProof(betaG, beta, knowledgeProofForBeta, q, n, ecCurve, h, authenticationServerResponse.getServerId(), digest);
 
         ECPoint alphaG = Owl_Util.calculateGA(gx1, gx3, gx4);
         BigInteger x2pi = Owl_Util.calculateX2s(n, x2, pi); 
-        this.alpha = Owl_Util.calculateA(alphaG, x2pi);
+        ECPoint alpha = Owl_Util.calculateA(alphaG, x2pi);
 
         ECSchnorrZKP knowledgeProofForAlpha  = Owl_Util.calculateZeroknowledgeProof(alphaG, n, x2pi, alpha, digest, clientId, random);
 
         this.rawKey = Owl_Util.calculateKeyingMaterial(gx4, x2, x2pi, beta);
 
-        BigInteger hTranscript = Owl_Util.calculateTranscript(rawKey, clientId, gx1, gx2, knowledgeProofX1, knowledgeProofX2, serverId, gx3, gx4, 
-            knowledgeProofX3, knowledgeProofX4, beta, knowledgeProofBeta, alpha, knowledgeProofForAlpha, digest);
+        BigInteger hTranscript = Owl_Util.calculateTranscript(rawKey, clientId, gx1, gx2, knowledgeProofForX1, knowledgeProofForX2, serverId, gx3, gx4, 
+            knowledgeProofForX3, knowledgeProofForX4, beta, knowledgeProofForBeta, alpha, knowledgeProofForAlpha, digest);
 
         BigInteger r = Owl_Util.calculateR(x1, t, hTranscript, n);
 
@@ -467,9 +487,8 @@ public class Owl_Client
          */
         Arrays.fill(password, (char)0);
         this.password = null;
-
-        BigInteger keyingMaterial = Owl_Util.calculateHash(rawKey);
-
+        
+        BigInteger keyingMaterial = Owl_Util.deriveKCKey(rawKey);
         /*
          * Clear the ephemeral private key fields as well.
          * Note that we're relying on the garbage collector to do its job to clean these up.
@@ -480,7 +499,6 @@ public class Owl_Client
          */
         this.x1 = null;
         this.x2 = null;
-        this.alpha = null;
         this.rawKey = null;
 
         /*
@@ -505,11 +523,11 @@ public class Owl_Client
     {
         if (this.state >= STATE_KC_INITIALISED)
         {
-            throw new IllegalStateException("Round3 payload already created for " + this.clientId);
+            throw new IllegalStateException("Key Confirmation already initiated for " + this.clientId);
         }
         if (this.state < STATE_KEY_CALCULATED)
         {
-            throw new IllegalStateException("Keying material must be calculated prior to creating Round3 payload for " + this.clientId);
+            throw new IllegalStateException("Keying material must be calculated prior to initialising key confirmation for " + this.clientId);
         }
 
         BigInteger macTag = Owl_Util.calculateMacTag(
@@ -544,14 +562,14 @@ public class Owl_Client
     {
         if (this.state >= STATE_KC_VALIDATED)
         {
-            throw new IllegalStateException("Validation already attempted for round3 payload for" + clientId);
+            throw new IllegalStateException("Validation already attempted for this payload for" + clientId);
         }
         if (this.state < STATE_KEY_CALCULATED)
         {
-            throw new IllegalStateException("Keying material must be calculated validated prior to validating Round3 payload for " + this.clientId);
+            throw new IllegalStateException("Keying material must be calculated prior to validating this payload for " + this.clientId);
         }
-        Owl_Util.validateIdsDiffer(clientId, keyConfirmationPayload.getId());
-        Owl_Util.validateIdsEqual(this.serverId, keyConfirmationPayload.getId());
+        Owl_Util.validateParticipantIdsDiffer(clientId, keyConfirmationPayload.getId());
+        Owl_Util.validateParticipantIdsEqual(this.serverId, keyConfirmationPayload.getId());
 
         Owl_Util.validateMacTag(
             this.clientId,
@@ -581,6 +599,17 @@ public class Owl_Client
         try 
         {
             return Owl_Util.calculateT(n, clientId + new String(password), digest);
+        } 
+        catch (CryptoException e)
+        {
+            throw Exceptions.illegalStateException(e.getMessage(), e);
+        }
+    }
+    private BigInteger calculateT(String username, char[] password)
+    {
+        try 
+        {
+            return Owl_Util.calculateT(n, username + new String(password), digest);
         } 
         catch (CryptoException e)
         {

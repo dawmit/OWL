@@ -1,23 +1,24 @@
-package org.bouncycastle.crypto.agreement.test;
+package org.example;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import junit.framework.TestCase;
+import java.util.function.Function;
+import java.util.function.Consumer;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 
-/**import org.bouncycastle.crypto.agreement.ecjpake.Owl_Curve;
-import org.bouncycastle.crypto.agreement.ecjpake.Owl_Curves;
-import org.bouncycastle.crypto.agreement.ecjpake.Owl_Client;
-import org.bouncycastle.crypto.agreement.ecjpake.Owl_AuthenticationInitiate;
-import org.bouncycastle.crypto.agreement.ecjpake.ECJPAKERound2Payload;
-import org.bouncycastle.crypto.agreement.ecjpake.ECJPAKERound3Payload;
-*/
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
 public class Owl_ClientTest
-    extends TestCase
 {
 
     public void testConstruction()
@@ -29,75 +30,42 @@ public class Owl_ClientTest
         String clientId = "clientId";
         char[] password = "password".toCharArray();
 
-        new Owl_Client(clientId, password, curve, digest, random);
+        //should succeed
+        assertDoesNotThrow(() ->
+            new Owl_Client(clientId, password, curve, digest, random)
+        );
 
-        // null clientId
-        try
-        {
-            new Owl_Client(null, password, curve, digest, random);
-            fail();
-        }
-        catch (NullPointerException e)
-        {
-            // pass
-        }
+        //null clientId
+        assertThrows(NullPointerException.class, () ->
+            new Owl_Client(null, password, curve, digest, random)
+        );
 
-        // null password
-        try
-        {
-            new Owl_Client(clientId, null, curve, digest, random);
-            fail();
-        }
-        catch (NullPointerException e)
-        {
-            // pass
-        }
+        //null password
+        assertThrows(NullPointerException.class, () ->
+            new Owl_Client(clientId, null, curve, digest, random)
+        );
 
-        // empty password
-        try
-        {
-            new Owl_Client(clientId, "".toCharArray(), curve, digest, random);
-            fail();
-        }
-        catch (IllegalArgumentException e)
-        {
-            // pass
-        }
+        //empty password
+        assertThrows(IllegalArgumentException.class, () ->
+            new Owl_Client(clientId, "".toCharArray(), curve, digest, random)
+        );
 
-        // null curve
-        try
-        {
-            new Owl_Client(clientId, password, null, digest, random);
-            fail();
-        }
-        catch (NullPointerException e)
-        {
-            // pass
-        }
+        //null curve
+        assertThrows(NullPointerException.class, () ->
+            new Owl_Client(clientId, password, null, digest, random)
+        );
 
-        // null digest
-        try
-        {
-            new Owl_Client(clientId, password, curve, null, random);
-            fail();
-        }
-        catch (NullPointerException e)
-        {
-            // pass
-        }
+        //null digest
+        assertThrows(NullPointerException.class, () ->
+            new Owl_Client(clientId, password, curve, null, random)
+        );
 
-        // null random
-        try
-        {
-            new Owl_Client(clientId, password, curve, digest, null);
-            fail();
-        }
-        catch (NullPointerException e)
-        {
-            // pass
-        }
+        //null random
+        assertThrows(NullPointerException.class, () ->
+            new Owl_Client(clientId, password, curve, digest, null)
+        );
     }
-
+    @Test
     public void testSuccessfulExchange()
         throws CryptoException
     {
@@ -106,12 +74,12 @@ public class Owl_ClientTest
         Owl_Client client = createClient();
 
         Owl_InitialRegistration clientRegistrationPayload = client.initiateUserRegistration();
-        Owl_FinishRegistration serverRegistrationPayload = server.registerUserOnServer(clientRegistrationPayload);
+        Owl_FinishRegistration serverRegistrationPayload = server.registerUseronServer(clientRegistrationPayload);
 
         Owl_AuthenticationInitiate clientLoginInitialPayload = client.authenticationInitiate();
         Owl_AuthenticationServerResponse serverLoginResponsePayload = server.authenticationServerResponse(clientLoginInitialPayload, serverRegistrationPayload);
 
-        Owl_AuthenticationFinish clientLoginFinishPayload = client.autheticationFinish(serverLoginResponsePayload);
+        Owl_AuthenticationFinish clientLoginFinishPayload = client.authenticationFinish(serverLoginResponsePayload);
         server.authenticationServerEnd(clientLoginFinishPayload);
 
         BigInteger clientKeyingMaterial = client.calculateKeyingMaterial();
@@ -120,27 +88,27 @@ public class Owl_ClientTest
         Owl_KeyConfirmation clientKCPayload = client.initiateKeyConfirmation(clientKeyingMaterial);
         Owl_KeyConfirmation serverKCPayload = server.initiateKeyConfirmation(serverKeyingMaterial);
 
-        client.validateKeyConfirmation(serveKCPayload, clientKeyingMaterial);
+        client.validateKeyConfirmation(serverKCPayload, clientKeyingMaterial);
         server.validateKeyConfirmation(clientKCPayload, serverKeyingMaterial);
 
         assertEquals(serverKeyingMaterial, clientKeyingMaterial);
 
     }
-
+    @Test
     public void testIncorrectPassword()
         throws CryptoException
     {
         Owl_Client client = createClient();
         Owl_Server server = createServerWithWrongPassword();
 
-        Owl_InitialRegistration clientRegistrationPayload = client.initiateUserRegistration();
-        Owl_FinishRegistration serverRegistrationPayload = server.registerUserOnServer(clientRegistrationPayload);
+        Owl_InitialRegistration clientRegistrationPayload = Owl_Client.initiateUserRegistration();
+        Owl_FinishRegistration serverRegistrationPayload = Owl_Server.registerUseronServer(clientRegistrationPayload);
 
         Owl_AuthenticationInitiate clientLoginInitialPayload = client.authenticationInitiate();
         Owl_AuthenticationServerResponse serverLoginResponsePayload = server.authenticationServerResponse(clientLoginInitialPayload, serverRegistrationPayload);
 
-        Owl_AuthenticationFinish clientLoginFinishPayload = client.autheticationFinish(serverLoginResponsePayload);
-        server.autheticationServerEnd(clientLoginFinishPayload);
+        Owl_AuthenticationFinish clientLoginFinishPayload = client.authenticationFinish(serverLoginResponsePayload);
+        server.authenticationServerEnd(clientLoginFinishPayload);
 
         BigInteger clientKeyingMaterial = client.calculateKeyingMaterial();
         BigInteger serverKeyingMaterial = server.calculateKeyingMaterial();
@@ -149,27 +117,16 @@ public class Owl_ClientTest
         Owl_KeyConfirmation serverKCPayload = server.initiateKeyConfirmation(serverKeyingMaterial);
 
         // Validate incorrect passwords result in a CryptoException
-        try
-        {
-            client.validateKeyConfirmation(serverKCPayload, clientKeyingMaterial);
-            fail();
-        }
-        catch (CryptoException e)
-        {
-            // pass
-        }
 
-        try
-        {
-            server.validateKeyConfirmation(clientKCPayload, serverKeyingMaterial);
-            fail();
-        }
-        catch (CryptoException e)
-        {
-            // pass
-        }
+        assertThrows(CryptoException.class,
+                () -> server.validateKeyConfirmation(clientKCPayload, serverKeyingMaterial),
+                "Server validation should fail with incorrect password");
+
+        assertThrows(CryptoException.class,
+                () -> client.validateKeyConfirmation(serverKCPayload, clientKeyingMaterial),
+                "Client validation should fail with incorrect password");
     }
-
+    @Test
     public void testStateValidation()
         throws CryptoException
     {
@@ -179,297 +136,156 @@ public class Owl_ClientTest
 
         // We're testing client here. Server is just used for help.
 
-        // START USER LOGIN REGISTRATION CHECKS
-
+         // --- USER REGISTRATION CHECKS ---
         assertEquals(Owl_Client.REGISTRATION_NOT_CALLED, server.getRegistrationState());
 
-        Owl_InitialRegistration clientRegistrationPayload = client.initiateUserRegistration();
-        Owl_FinishRegistration serverRegistrationPayload = server.registerUserOnServer(clientRegistrationPayload);
+        Owl_InitialRegistration clientRegistrationPayload = Owl_Client.initiateUserRegistration();
+        Owl_FinishRegistration serverRegistrationPayload = Owl_Server.registerUseronServer(clientRegistrationPayload);
 
-        //create client registration payload twice
+        // client registration cannot be called twice
+        assertThrows(IllegalStateException.class,
+                () -> Owl_Client.initiateUserRegistration);
 
-        try
-        {
-            client.initiateUserRegistration();
-            fail();
-        }
-        catch(IllegalStateException e)
-        {
-            // pass
-        }
-
-        // START LOGIN INITIALISATION CHECKS
-
-        assertEquals(Owl_Client.STATE_INITIALIZED, client.getState());
-
-        // call server login initialise function before client login initialisation.
-        try 
-        {
-            server.authenticationServerResponse(null, null);
-            fail();
-        }
-        catch(IllegalStateException e)
-        {
-            // pass 
-        }
+        // --- LOGIN INITIALIZATION CHECKS ---
+        assertEquals(Owl_Client.STATE_INITIALISED, client.getState());
 
         Owl_AuthenticationInitiate clientLoginInitialPayload = client.authenticationInitiate();
-
         assertEquals(Owl_Client.STATE_LOGIN_INITIALISED, client.getState());
 
-        //call client login intialisation twice.
+        // client cannot initiate login twice
+        assertThrows(IllegalStateException.class,
+                client::authenticationInitiate);
 
-        try 
-        {
-            client.authenticationInitiate();
-            fail();
-        }
-        catch 
-        {
-            // pass
-        }
+        Owl_AuthenticationServerResponse serverLoginResponsePayload =
+                server.authenticationServerResponse(clientLoginInitialPayload, serverRegistrationPayload);
 
-        Owl_AuthenticationServerResponse serverLoginResponsePayload = server.authenticationServerResponse(clientLoginInitialPayload, serverRegistrationPayload);
+        // --- LOGIN FINISH CHECKS ---
+        // cannot calculate key before finishing authentication
+        assertThrows(IllegalStateException.class,
+                client::calculateKeyingMaterial);
 
-        // START LOGIN FINISH CHECKS
-
-        // create key before ending login authentication finish
-        try
-        {
-            client.calculateKeyingMaterial();
-            fail();
-        }
-        catch (IllegalStateException e)
-        {
-            // pass
-        }
-
-        Owl_AuthenticationFinish clientLoginFinishPayload = client.auhenticationFinish(serverLoginResponsePayload);
+        Owl_AuthenticationFinish clientLoginFinishPayload =
+                client.authenticationFinish(serverLoginResponsePayload);
         assertEquals(Owl_Client.STATE_LOGIN_FINISHED, client.getState());
 
-        // create client login end twice
-        try
-        {
-            client.authenticationFinish(serverLoginResponsePayload);
-            fail();
-        }
-        catch (IllegalStateException e)
-        {
-            // pass
-        }
+        // cannot finish login twice
+        assertThrows(IllegalStateException.class,
+                () -> client.authenticationFinish(serverLoginResponsePayload));
 
-        // START KEY CALCULATION CHECKS
+        server.authenticationServerEnd(clientLoginFinishPayload);
+        // --- KEY CALCULATION CHECKS ---
+        // cannot start key confirmation before calculating key
+        assertThrows(IllegalStateException.class,
+                () -> client.initiateKeyConfirmation(null));
 
-        // begin key confirmation before calculating key
+        // cannot validate key confirmation before calculating key
+        assertThrows(IllegalStateException.class,
+                () -> client.validateKeyConfirmation(null, null));
 
-        try
-        {
-            client.initiateKeyConfirmation(null);
-            fail();
-        }
-        catch (IllegalStateException e)
-        {
-            // pass
-        }
-
-        BigInteger rawServerKey = client.calculateKeyingMaterial();
-
+        BigInteger rawClientKey = client.calculateKeyingMaterial();
         assertEquals(Owl_Client.STATE_KEY_CALCULATED, client.getState());
 
-        // calculate key twice
-        try
-        {
-            client.calculateKeyingMaterial();
-            fail();
-        }
-        catch (IllegalStateException e)
-        {
-            // pass
-        }
+        // cannot calculate key twice
+        assertThrows(IllegalStateException.class,
+                client::calculateKeyingMaterial);
 
-        BigInteger rawServerKey  = server.calculateKeyingMaterial();       
+        BigInteger rawServerKey = server.calculateKeyingMaterial();
 
-        // START KEY CONFIRMATION CHECKS
+        // --- KEY CONFIRMATION CHECKS ---
 
-        // validate key confirmation before creating key confirmation payload.
-
-        try 
-        {
-            client.validateKeyConfirmation(null, rawClientKey);
-            fail();
-        }
-        catch (IllegalStateException e)
-        {
-            // pass
-        }
-
-        Owl_KeyConfirmation clientKC  = client.initiateKeyConfirmation(rawClientKey);
-
+        Owl_KeyConfirmation clientKC = client.initiateKeyConfirmation(rawClientKey);
         assertEquals(Owl_Client.STATE_KC_INITIALISED, client.getState());
 
-        // initalise key confirmation twice
-        try
-        {
-            client.initiateKeyConfirmation(rawClientKey);
-            fail();
-        }catch{
-            // pass
-        }
+        // cannot initiate key confirmation twice
+        assertThrows(IllegalStateException.class,
+                () -> client.initiateKeyConfirmation(rawClientKey));
 
         Owl_KeyConfirmation serverKC = server.initiateKeyConfirmation(rawServerKey);
 
         client.validateKeyConfirmation(serverKC, rawClientKey);
-
         assertEquals(Owl_Client.STATE_KC_VALIDATED, client.getState());
 
-        // try validate key confirmation twice
+        // cannot validate key confirmation twice
+        assertThrows(IllegalStateException.class,
+                () -> client.validateKeyConfirmation(serverKC, rawClientKey));
 
-        try{
-            client.validateKeyConfirmation(serverKC, rawClientKey);
-            fail();
-        }catch {
-            //pass
-        }
-
+        // server should validate successfully at the end
         server.validateKeyConfirmation(clientKC, rawServerKey);
     }
-
+    @Test
     public void testAuthenticationFinish()
         throws CryptoException
     {
 
-        Owl_AuthenticationServerReponse serverLoginReponsePayload = runExchangeUntilPass3();
+        Owl_AuthenticationServerResponse serverResponse = runExchangeUntilPass3();
         //should succeed
-        Owl_AuthenticationFinish clientLoginFinishPayload = createClient().authenticationFinish(serverLoginReponsePayload);
+        Owl_AuthenticationFinish clientLoginFinishPayload = assertDoesNotThrow(() -> createClient().authenticationFinish(serverResponse));
 
-        // clientId is the same as serverId
-        try 
-        {
-            createClient().authenticationServerEnd(new Owl_AuthenticationServerResponse(
-                "client", 
-                serverLoginResponsePayload.getGx3(),
-                serverLoginResponsePayload.getGx4(),
-                serverLoginResponsePayload.getKnowledgeProofForX3(),
-                serverLoginResponsePayload.getKnowledgeProofForX4(),
-                serverLoginResponsePayload.getBeta(),
-                serverLoginResponsePayload.getKnowledgeProofForBeta()));
-            fail();
-        }
-        catch 
-        {
-            // pass
-        }
-        // try gx3 is infinity
+        // Helper to modify server response
+        Function<Consumer<Owl_AuthenticationServerResponseBuilder>, Owl_AuthenticationServerResponse> buildResponse =
+            modifier -> {
+                Owl_AuthenticationServerResponseBuilder builder = new Owl_AuthenticationServerResponseBuilder(serverResponse);
+                modifier.accept(builder);
+                return builder.build();
+            };
+
+        // Test cases where client should throw CryptoException
+        // clientId == serverId
+        assertThrows(CryptoException.class, () ->
+            createClient().authenticationFinish(
+                buildResponse.apply(b -> b.setServerId("client"))
+            )
+        );
         Owl_Curve curve = Owl_Curves.NIST_P256;
-        try 
-        {
-            createClient().authenticationServerEnd(new Owl_AuthenticationServerResponse(
-                serverLoginResponsePayload.getServerId(),
-                curve.getCurve().getInfinity(),
-                serverLoginResponsePayload.getGx4(),
-                serverLoginResponsePayload.getKnowledgeProofForX3(),
-                serverLoginResponsePayload.getKnowledgeProofForX4(),
-                serverLoginResponsePayload.getBeta(),
-                serverLoginResponsePayload.getKnowledgeProofForBeta()));
-            fail();
-        }
-        catch 
-        {
-            // pass
-        }
-        // try gx4 is infinity
-        try 
-        {
-            createClient().authenticationServerEnd(new Owl_AuthenticationServerResponse(
-                serverLoginResponsePayload.getServerId(),
-                serverLoginResponsePayload.getGx3(),
-                curve.getCurve().getInfinity(),
-                serverLoginResponsePayload.getKnowledgeProofForX3(),
-                serverLoginResponsePayload.getKnowledgeProofForX4(),
-                serverLoginResponsePayload.getBeta(),
-                serverLoginResponsePayload.getKnowledgeProofForBeta()));
-            fail();
-        }
-        catch 
-        {
-            // pass
-        }
-        //validation of zero knowledge proof for X3 fails
-        try 
-        {
-            Owl_AuthenticationServerResponse serverLoginResponsePayload2 = runExchangeUntilPass3();  
-            createClient().authenticationServerEnd(new Owl_AuthenticationServerResponse(
-                serverLoginResponsePayload.getServerId(),
-                serverLoginResponsePayload.getGx3(),
-                serverLoginResponsePayload.getGx4(),
-                serverLoginResponsePayload2.getKnowledgeProofForX3(),
-                serverLoginResponsePayload.getKnowledgeProofForX4(),
-                serverLoginResponsePayload.getBeta(),
-                serverLoginResponsePayload.getKnowledgeProofForBeta()));
-            fail();
-        }
-        catch 
-        {
-            // pass
-        }
-        //validation of zero knowledge proof for X4 fails
-        try 
-        {
-            Owl_AuthenticationServerResponse serverLoginResponsePayload2 = runExchangeUntilPass3();
-            createClient().authenticationServerEnd(new Owl_AuthenticationServerResponse(
-                serverLoginResponsePayload.getServerId(),
-                serverLoginResponsePayload.getGx3(),
-                serverLoginResponsePayload.getGx4(),
-                serverLoginResponsePayload.getKnowledgeProofForX3(),
-                serverLoginResponsePayload2.getKnowledgeProofForX4(),
-                serverLoginResponsePayload.getBeta(),
-                serverLoginResponsePayload.getKnowledgeProofForBeta()));
-            fail();
-        }
-        catch 
-        {
-            // pass
-        }
+        // gx3 is infinity
+        assertThrows(CryptoException.class, () ->
+            createClient().authenticationFinish(
+                buildResponse.apply(b -> b.setGx3(curve.getCurve().getInfinity()))
+            )
+        );
+
+        // gx4 is infinity
+        assertThrows(CryptoException.class, () ->
+            createClient().authenticationFinish(
+                buildResponse.apply(b -> b.setGx4(curve.getCurve().getInfinity()))
+            )
+        );
+
+        // Invalid zero-knowledge proof for X3
+        Owl_AuthenticationServerResponse invalidX3Proof = runExchangeUntilPass3();
+        assertThrows(CryptoException.class, () ->
+            createClient().authenticationFinish(
+                buildResponse.apply(b -> b.setKnowledgeProofForX3(invalidX3Proof.getKnowledgeProofForX3()))
+            )
+        );
+
+        // Invalid zero-knowledge proof for X4
+        Owl_AuthenticationServerResponse invalidX4Proof = runExchangeUntilPass3();
+        assertThrows(CryptoException.class, () ->
+            createClient().authenticationFinish(
+                buildResponse.apply(b -> b.setKnowledgeProofForX4(invalidX4Proof.getKnowledgeProofForX4()))
+            )
+        );
+
         // Beta is infinity
-        try 
-        {
-            createClient().authenticationServerEnd(new Owl_AuthenticationServerResponse(
-                serverLoginResponsePayload.getServerId(),
-                serverLoginResponsePayload.getGx3(),
-                serverLoginResponsePayload.getGx4(),
-                serverLoginResponsePayload.getKnowledgeProofForX3(),
-                serverLoginResponsePayload.getKnowledgeProofForX4(),
-                curve.getCurve().getInfinity(),
-                serverLoginResponsePayload.getKnowledgeProofForBeta()));
-            fail();
-        }
-        catch 
-        {
-            // pass
-        }
-        //validation of zero knowledge proof for Beta fails
-        try 
-        {
-            Owl_AuthenticationServerResponse serverLoginResponsePayload2 = runExchangeUntilPass3();
-            createClient().authenticationServerEnd(new Owl_AuthenticationServerResponse(
-                serverLoginResponsePayload.getServerId(),
-                serverLoginResponsePayload.getGx3(),
-                serverLoginResponsePayload.getGx4(),
-                serverLoginResponsePayload.getKnowledgeProofForX3(),
-                serverLoginResponsePayload.getKnowledgeProofForX4(),
-                serverLoginResponsePayload.getBeta(),
-                serverLoginResponsePayload2.getKnowledgeProofForBeta()));
-            fail();
-        }
-        catch 
-        {
-            // pass
-        }
+        assertThrows(CryptoException.class, () ->
+            createClient().authenticationFinish(
+                buildResponse.apply(b -> b.setBeta(curve.getCurve().getInfinity()))
+            )
+        );
+
+        // Invalid zero-knowledge proof for Beta
+        Owl_AuthenticationServerResponse invalidBetaProof = runExchangeUntilPass3();
+        assertThrows(CryptoException.class, () ->
+            createClient().authenticationFinish(
+                buildResponse.apply(b -> b.setKnowledgeProofForBeta(invalidBetaProof.getKnowledgeProofForBeta()))
+            )
+        );
     }
 
-    private Owl_Client createServer()
+    private Owl_Server createServer()
     {
-        return new Owl_Client("server", "password".toCharArray(), Owl_Curves.NIST_P256);
+        return new Owl_Server("server", "password".toCharArray(), Owl_Curves.NIST_P256);
     }
 
     private Owl_Client createClient()
@@ -477,19 +293,51 @@ public class Owl_ClientTest
         return new Owl_Client("client", "password".toCharArray(), Owl_Curves.NIST_P256);
     }
 
-    private Owl_Server createServertWithWrongPassword()
+    private Owl_Server createServerWithWrongPassword()
     {
         return new Owl_Server("server", "wrong".toCharArray(), Owl_Curves.NIST_P256);
     }
-    private Owl_authenticationFinish runExchangeUntilPass3()
+    private Owl_AuthenticationServerResponse runExchangeUntilPass3()
+    throws CryptoException
     {
-        Owl_Client server = createServer();
+        Owl_Server server = createServer();
         Owl_Client client = createClient();
 
         Owl_InitialRegistration clientRegistrationPayload = client.initiateUserRegistration();
-        Owl_FinishRegistration serverRegistrationPayload = server.registerUserOnServer(clientRegistrationPayload);
+        Owl_FinishRegistration serverRegistrationPayload = server.registerUseronServer(clientRegistrationPayload);
 
         Owl_AuthenticationInitiate clientLoginInitialPayload = client.authenticationInitiate();
         return server.authenticationServerResponse(clientLoginInitialPayload, serverRegistrationPayload);
     }
+
+    private class Owl_AuthenticationServerResponseBuilder {
+        private String serverId;
+        private ECPoint gx3, gx4, beta;
+        private ECSchnorrZKP zkpX3, zkpX4, zkpBeta;
+
+        public Owl_AuthenticationServerResponseBuilder(Owl_AuthenticationServerResponse resp) {
+            this.serverId = resp.getServerId();
+            this.gx3 = resp.getGx3();
+            this.gx4 = resp.getGx4();
+            this.beta = resp.getBeta();
+            this.zkpX3 = resp.getKnowledgeProofForX3();
+            this.zkpX4 = resp.getKnowledgeProofForX4();
+            this.zkpBeta = resp.getKnowledgeProofForBeta();
+        }
+
+        public void setServerId(String id) { this.serverId = id; }
+        public void setGx3(ECPoint gx3) { this.gx3 = gx3; }
+        public void setGx4(ECPoint gx4) { this.gx4 = gx4; }
+        public void setBeta(ECPoint beta) { this.beta = beta; }
+        public void setKnowledgeProofForX3(ECSchnorrZKP zkp) { this.zkpX3 = zkp; }
+        public void setKnowledgeProofForX4(ECSchnorrZKP zkp) { this.zkpX4 = zkp; }
+        public void setKnowledgeProofForBeta(ECSchnorrZKP zkp) { this.zkpBeta = zkp; }
+
+        public Owl_AuthenticationServerResponse build() {
+            return new Owl_AuthenticationServerResponse(
+                serverId, gx3, gx4, zkpX3, zkpX4, beta, zkpBeta
+            );
+        }
+    }
+
 }

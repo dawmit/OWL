@@ -1,4 +1,4 @@
-package org.bouncycastle.crypto.agreement.Owl;
+package org.example;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -65,15 +65,15 @@ public class Owl_Util
     {
         if(gx1.isInfinity())
         {
-            throws new CryptoException("Gx1 cannot be infinity");
+            throw new CryptoException("Gx1 cannot be infinity");
         }
-        if(gx2.isInfinity())
+        if(gx4.isInfinity())
         {
-            throws new CryptoException("Gx2 cannot be infinity");
+            throw new CryptoException("Gx2 cannot be infinity");
         }
         if(gx3.isInfinity())
         {
-            throws new CryptoException("Gx3 cannot be infinity");
+            throw new CryptoException("Gx3 cannot be infinity");
         }
         // ga = g^(x1+x3+x4) = g^x1 * g^x3 * g^x4 
         return gx1.add(gx3).add(gx4);
@@ -108,8 +108,8 @@ public class Owl_Util
      * t is calculated by H(username||password) mod n
      */
     public static BigInteger calculateT(
-        BigInteger n
-        String string
+        BigInteger n,
+        String string,
         Digest digest)
         throws CryptoException
     {
@@ -120,17 +120,21 @@ public class Owl_Util
         }
         return t;
     }
-
     /**
      *  Calculate pi for initial registration.
      * pi = H(t).mod(n)
      */
-    public static BigInteger calcualtePi(
+    public static BigInteger calculatePi(
         BigInteger n,
         BigInteger t,
         Digest digest)
     {
-        return calculateHash(t, digest).mod(n);
+        BigInteger pi = caluclateHash(t, digest).mod(n);
+        if(pi.equals(ZERO)){
+            throw new CryptoException("MUST ensure that pi is not equal to 0 modulo n");
+        }
+        return pi;
+
     }
 
     /**
@@ -158,7 +162,7 @@ public class Owl_Util
 
 
     private static BigInteger calculateHash(
-        String string
+        String string,
         Digest digest)
     {
         digest.reset();
@@ -174,7 +178,7 @@ public class Owl_Util
     }
 
     private static BigInteger calculateHash(
-        BigInteger bigint
+        BigInteger bigint,
         Digest digest)
     {
         digest.reset();
@@ -389,7 +393,7 @@ public class Owl_Util
         BigInteger x2pi,
         ECPoint B)
     {
-        return (B.subtract(gx4.multiply(x2pi)).multiply(x2);
+        return B.subtract(gx4.multiply(x2pi)).multiply(x2);
     }
 
     /**
@@ -437,7 +441,7 @@ public class Owl_Util
         updateDigestIncludingSize(digest, knowledgeProofX4.getr());
         updateDigestIncludingSize(digest, beta);
         updateDigestIncludingSize(digest, knowledgeProofBeta.getV());
-        updateDigestIncludingSize(digest, knowledgeProofBeta.getr();
+        updateDigestIncludingSize(digest, knowledgeProofBeta.getr());
         updateDigestIncludingSize(digest, alpha);
         updateDigestIncludingSize(digest, knowledgeProofAlpha.getV());
         updateDigestIncludingSize(digest, knowledgeProofAlpha.getr());
@@ -477,6 +481,18 @@ public class Owl_Util
         {
             throw new CryptoException("Verification for r failed, g^r . T^h = X1 must be true");
         }
+    }
+
+    /**
+     * Derives a KC key from the raw {@link ECPoint} key 
+     * and returns a {@link BigInteger}. 
+     * This is not a key derivation function used to derive a session key, although it can be used that way.
+     * It is used specifically during explicit key confirmation.
+     */
+    public static BigInteger deriveKCKey(ECPoint rawKey)
+    {
+        rawKey = rawKey.normalize();
+        return rawKey.getAffineXCoord().toBigInteger();
     }
 
     /**

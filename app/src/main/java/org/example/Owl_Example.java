@@ -1,4 +1,4 @@
-package org.bouncycastle.crypto.examples;
+package org.example;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -28,7 +28,7 @@ public class Owl_Example {
          * Pick an appropriate elliptic curve to use throughout the exchange.
          * Note that both participants must use the same group.
          */
-        ECJPAKECurve curve = ECJPAKECurves.NIST_P256;
+        Owl_Curve curve = Owl_Curves.NIST_P256;
 
         ECCurve ecCurve = curve.getCurve();
         BigInteger a = curve.getA();
@@ -73,7 +73,7 @@ public class Owl_Example {
          */
 
         Owl_InitialRegistration clientUserRegistration = client.initiateUserRegistration();
-        Owl_FinishRegistration serverUserRegistration = server.registerUserOnServer(clientUserRegistration);
+        Owl_FinishRegistration serverUserRegistration = server.registerUseronServer(clientUserRegistration);
 
         System.out.println("************ User Registration **************");
         System.out.println("Client sends to Server: ");
@@ -120,12 +120,12 @@ public class Owl_Example {
         System.out.println("Server verifies the client's KP{x2}: OK\n");
         System.out.println("Server sends to Client: ");
         System.out.println("Server's unique ID: " + serverLoginResponse.getServerId());
-        System.out.println("g^{x3}=" + new BigInteger(serverUserRegistration.getGx3().getEncoded(true)).toString(16));
-        System.out.println("g^{x4}=" + new BigInteger(serverUserRegistration.getGx4().getEncoded(true)).toString(16));
-        System.out.println("KP{x3}: {V=" + new BigInteger(serverUserRegistration.getKnowledgeProofForX3().getV().getEncoded(true)).toString(16) + "; r=" + serverUserRegistration.getKnowledgeProofForX3().getr().toString(16) + "}");
-        System.out.println("KP{x4}: {V=" + new BigInteger(serverUserRegistration.getKnowledgeProofForX4().getV().getEncoded(true)).toString(16) + "; r=" + serverUserRegistration.getKnowledgeProofForX4().getr().toString(16) + "}");
-    	System.out.println("Beta="+new BigInteger(serverUserRegistration.getBeta().getEncoded(true)).toString(16));
-    	System.out.println("KP{Beta}: {V="+new BigInteger(serverUserRegistration.getKnowledgeProofForBeta().getV().getEncoded(true)).toString(16)+", r="+serverUserRegistration.getKnowledgeProofForBeta().getr().toString(16)+"}");
+        System.out.println("g^{x3}=" + new BigInteger(serverLoginResponse.getGx3().getEncoded(true)).toString(16));
+        System.out.println("g^{x4}=" + new BigInteger(serverLoginResponse.getGx4().getEncoded(true)).toString(16));
+        System.out.println("KP{x3}: {V=" + new BigInteger(serverLoginResponse.getKnowledgeProofForX3().getV().getEncoded(true)).toString(16) + "; r=" + serverLoginResponse.getKnowledgeProofForX3().getr().toString(16) + "}");
+        System.out.println("KP{x4}: {V=" + new BigInteger(serverLoginResponse.getKnowledgeProofForX4().getV().getEncoded(true)).toString(16) + "; r=" + serverLoginResponse.getKnowledgeProofForX4().getr().toString(16) + "}");
+    	System.out.println("Beta="+new BigInteger(serverLoginResponse.getBeta().getEncoded(true)).toString(16));
+    	System.out.println("KP{Beta}: {V="+new BigInteger(serverLoginResponse.getKnowledgeProofForBeta().getV().getEncoded(true)).toString(16)+", r="+serverLoginResponse.getKnowledgeProofForBeta().getr().toString(16)+"}");
         System.out.println("");
 
         /*
