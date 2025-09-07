@@ -128,8 +128,9 @@ public class Owl_Util
         BigInteger n,
         BigInteger t,
         Digest digest)
+        throws CryptoException
     {
-        BigInteger pi = caluclateHash(t, digest).mod(n);
+        BigInteger pi = calculateHash(t, digest).mod(n);
         if(pi.equals(ZERO)){
             throw new CryptoException("MUST ensure that pi is not equal to 0 modulo n");
         }

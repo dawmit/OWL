@@ -38,7 +38,6 @@ public class Owl_Example {
         BigInteger n = curve.getN();
         BigInteger q = curve.getQ();
 
-        String serverPassword = "password";
         String clientPassword = "password";
 
         System.out.println("********* Initialization **********");
@@ -53,17 +52,21 @@ public class Owl_Example {
     	System.out.println("Prime field q (" + q.bitLength() + " bits): "+ q.toString(16));
         System.out.println("");
 
-        System.out.println("(Secret passwords used by Client and Server: " +
-                "\"" + clientPassword + "\" and \"" + serverPassword + "\")\n");
+        System.out.println("(Secret passwords used by Client: " + clientPassword + ")");
 
         /*
          * Both participants must use the same hashing algorithm.
+         * Both participants muse use the same hashing algorithm 
+         * and elliptic curve for registration and authentication.
          */
         Digest digest = SHA256Digest.newInstance();
         SecureRandom random = new SecureRandom();
 
+        Owl_ClientRegistration clientReg = new Owl_ClientRegistration("client", clientPassword.toCharArray(), curve, digest, random);
+        Owl_ServerRegistration serverReg = new Owl_ServerRegistration("server", curve, digest, random);
+
         Owl_Client client = new Owl_Client("client", clientPassword.toCharArray(), curve, digest, random);
-        Owl_Server server = new Owl_Server("server", serverPassword.toCharArray(), curve, digest, random);
+        Owl_Server server = new Owl_Server("server", curve, digest, random);
 
         /*
          * Initial User Registration
@@ -72,8 +75,8 @@ public class Owl_Example {
          * and securely stores (server storage is upto the user of this handshake protocol).
          */
 
-        Owl_InitialRegistration clientUserRegistration = client.initiateUserRegistration();
-        Owl_FinishRegistration serverUserRegistration = server.registerUseronServer(clientUserRegistration);
+        Owl_InitialRegistration clientUserRegistration = clientReg.initiateUserRegistration();
+        Owl_FinishRegistration serverUserRegistration = serverReg.registerUseronServer(clientUserRegistration);
 
         System.out.println("************ User Registration **************");
         System.out.println("Client sends to Server: ");
@@ -142,10 +145,15 @@ public class Owl_Example {
         System.out.println("Client verifies the server's KP{x3}: OK\n");
         System.out.println("Client verifies the server's KP{Beta}: OK\n");   
         System.out.println("Client sends to Server: ");
-        System.out.println("Username used to login" + clientLoginEnd.getClientId());
+        System.out.println("Username used to login: " + clientLoginEnd.getClientId());
         System.out.println("Alpha="+new BigInteger(clientLoginEnd.getAlpha().getEncoded(true)).toString(16));
         System.out.println("KP{Alpha}: {V="+new BigInteger(clientLoginEnd.getKnowledgeProofForAlpha().getV().getEncoded(true)).toString(16)+", r="+clientLoginEnd.getKnowledgeProofForAlpha().getr().toString(16)+"}");
+        System.out.println("r="+ clientLoginEnd.getR().toString(16));
+        
+        server.authenticationServerEnd(clientLoginEnd);
 
+        System.out.println("Server verifies the client's KP{Alpha}: OK\n");
+        System.out.println("Server verifies the client's r, {by checking g^r . T^h = gx1}: OK\n");
         /*
          * After the third pass, each participant computes the keying material.
          */

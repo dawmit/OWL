@@ -57,8 +57,8 @@ import org.bouncycastle.util.Exceptions;
  * The caller is responsible for deriving the session key using a secure key derivation function (KDF).
  * <p>
  * Round 3 is an optional key confirmation process.
- * If you do not execute round 3, then there is no assurance that both serves are using the same key.
- * (i.e. if the serves used different passwords, then their session keys will differ.)
+ * If you do not execute round 3, then there is no assurance that both client and server are using the same key.
+ * (i.e. if the client and server used different passwords (remember the server does not have access to the password, only the secret from which it was derived), then their session keys will differ.)
  * <p>
  * If the round 3 validation succeeds, then the keys are guaranteed to be the same on both sides.
  * <p>
@@ -84,11 +84,6 @@ public class Owl_Server
     public static final int STATE_KC_INITIALISED = 40;
     public static final int STATE_KC_VALIDATED = 50;
 
-    /*
-     * Possible states for user registration.
-     */
-    public static final boolean REGISTRATION_NOT_CALLED = false;
-    public static final boolean REGISTRATION_CALLED = true;
     /**
      * Unique identifier of this serve.
      * The two serves in the exchange must NOT share the same id.
@@ -99,16 +94,6 @@ public class Owl_Server
      * Unique identifier for the client in the exchange.
      */
     private String clientId;
-
-    /**
-     * Shared secret.  This only contains the secret between construction
-     * and the call to {@link #calculateKeyingMaterial()}.
-     * <p>
-     * i.e. When {@link #calculateKeyingMaterial()} is called, this buffer overwritten with 0's,
-     * and the field is set to null.
-     * </p>
-     */
-    private char[] password;
 
     /**
      * Digest to use during calculations.
@@ -195,10 +180,6 @@ public class Owl_Server
      * See the <tt>STATE_*</tt> constants for possible values.
      */
     private int state;
-    /**
-     * Checks if user registration is called more than once.
-     */
-    private boolean registrationState;
 
     /**
      * Convenience constructor for a new {@link Owl_Server} that uses
@@ -209,19 +190,13 @@ public class Owl_Server
      *
      * @param serverId unique identifier of this server.
      *                      The server and client in the exchange must NOT share the same id.
-     * @param password      shared secret.
-     *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
-     *                      Caller should clear the input password as soon as possible.
      * @throws NullPointerException     if any argument is null
-     * @throws IllegalArgumentException if password is empty
      */
     public Owl_Server(
-        String serverId,
-        char[] password)
+        String serverId)
     {
         this(
             serverId,
-            password,
             Owl_Curves.NIST_P256);
     }
 
@@ -233,22 +208,16 @@ public class Owl_Server
      *
      * @param serverId unique identifier of this server.
      *                      The server and client in the exchange must NOT share the same id.
-     * @param password      shared secret.
-     *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
-     *                      Caller should clear the input password as soon as possible.
      * @param curve         elliptic curve
      *                      See {@link Owl_Curves} for standard curves.
      * @throws NullPointerException     if any argument is null
-     * @throws IllegalArgumentException if password is empty
      */
     public Owl_Server(
         String serverId,
-        char[] password,
         Owl_Curve curve)
     {
         this(
             serverId,
-            password,
             curve,
             SHA256Digest.newInstance(),
             CryptoServicesRegistrar.getSecureRandom());
@@ -261,48 +230,23 @@ public class Owl_Server
      *
      * @param serverId unique identifier of this server.
      *                      The client and server in the exchange must NOT share the same id.
-     * @param password      shared secret.
-     *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
-     *                      Caller should clear the input password as soon as possible.
-     * @param curve         elliptic curve.
      *                      See {@link Owl_Curves} for standard curves
      * @param digest        digest to use during zero knowledge proofs and key confirmation (SHA-256 or stronger preferred)
      * @param random        source of secure random data for x3 and x4, and for the zero knowledge proofs
      * @throws NullPointerException     if any argument is null
-     * @throws IllegalArgumentException if password is empty
      */
     public Owl_Server(
         String serverId,
-        char[] password,
         Owl_Curve curve,
         Digest digest,
         SecureRandom random)
     {
         Owl_Util.validateNotNull(serverId, "serverId");
-        Owl_Util.validateNotNull(password, "password");
         Owl_Util.validateNotNull(curve, "curve params");
         Owl_Util.validateNotNull(digest, "digest");
         Owl_Util.validateNotNull(random, "random");
-        if (password.length == 0)
-        {
-            throw new IllegalArgumentException("Password must not be empty.");
-        }
 
         this.serverId = serverId;
-
-        /*
-         * Create a defensive copy so as to fully encapsulate the password.
-         *
-         * This array will contain the password for the lifetime of this
-         * serve BEFORE {@link #calculateKeyingMaterial()} is called.
-         *
-         * i.e. When {@link #calculateKeyingMaterial()} is called, the array will be cleared
-         * in order to remove the password from memory.
-         *
-         * The caller is responsible for clearing the original password array
-         * given as input to this constructor.
-         */
-        this.password = Arrays.copyOf(password, password.length);
 
         this.ecCurve = curve.getCurve();
         this.g = curve.getG();
@@ -314,7 +258,6 @@ public class Owl_Server
         this.random = random;
 
         this.state = STATE_INITIALISED;
-        this.registrationState = REGISTRATION_NOT_CALLED;
     }
 
     /**
@@ -324,45 +267,6 @@ public class Owl_Server
     public int getState()
     {
         return this.state;
-    }
-
-    /**
-     * Check's the status of the user registration
-     * I.E. whether or not this server has registered a user already.
-     * See the <tt>REGSITRATION_*</tt> constants for possible values.
-     */
-    public boolean getRegistrationState()
-    {
-        return this.registrationState;
-    }
-
-    /**
-     * Recieves the payload sent by the client as part of user registration, and stores necessary values away in the server (upto the user of this protocol).
-     * <p>
-     * Must be called after {@link #initiateUserRegistration()} by the {@link Owl_Client}.
-     * @throws IllegalStateException if this functions is called more than once.
-     */
-    public Owl_FinishRegistration registerUseronServer(
-        Owl_InitialRegistration userLoginRegistrationReceived
-        )
-    {
-        if(this.registrationState)
-        {
-            throw new IllegalStateException("Server has already registrered this payload, by "+ serverId);
-        }
-        BigInteger x3 = Owl_Util.generateX1(n, random);
-
-        ECPoint gx3 = Owl_Util.calculateGx(g, x3);
-
-        ECSchnorrZKP knowledgeProofForX3 = Owl_Util.calculateZeroknowledgeProof(g, n, x3, gx3, digest, serverId, random);
-
-        String clientId = userLoginRegistrationReceived.getClientId();
-        BigInteger pi = userLoginRegistrationReceived.getPi();
-        ECPoint gt = userLoginRegistrationReceived.getGt();
-
-        this.registrationState = REGISTRATION_CALLED;
-
-        return new Owl_FinishRegistration(clientId, knowledgeProofForX3, gx3, pi, gt); 
     }
 
     /**
@@ -439,11 +343,11 @@ public class Owl_Server
     {
         if (this.state >= STATE_LOGIN_FINISHED)
         {
-            throw new IllegalStateException("Authentication finish payload already created and validated by" + serverId);
+            throw new IllegalStateException("Authentication finish payload already created and validated by " + serverId);
         }
         if (this.state < STATE_LOGIN_INITIALISED)
         {
-            throw new IllegalStateException("Authentication server response required before authentication finish by" + this.serverId);
+            throw new IllegalStateException("Authentication server response required before authentication finish by " + this.serverId);
         }
 
         ECPoint alpha =  authenticationFinish.getAlpha();
@@ -483,7 +387,6 @@ public class Owl_Server
      * <p>
      * {@link #authenticationServerEnd(Owl_AuthenticationFinish)} must be called prior to this method.
      * <p>
-     * As a side effect, the internal {@link #password} array is cleared, since it is no longer needed.
      * <p>
      * After execution, the {@link #getState() state} will be  {@link #STATE_KEY_CALCULATED}.
      *
@@ -500,14 +403,6 @@ public class Owl_Server
         {
             throw new IllegalStateException("Round2 payload must be validated prior to creating key for " + serverId);
         }
-
-        /*
-         * Clear the password array from memory, since we don't need it anymore.
-         *
-         * Also set the field to null as a flag to indicate that the key has already been calculated.
-         */
-        Arrays.fill(password, (char)0);
-        this.password = null;
 
         BigInteger keyingMaterial = Owl_Util.deriveKCKey(rawKey);
 

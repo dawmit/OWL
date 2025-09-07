@@ -82,12 +82,6 @@ public class Owl_Client
     public static final int STATE_KC_INITIALISED = 40;
     public static final int STATE_KC_VALIDATED = 50;
 
-    /*
-     * Possible state for user registration.
-     */
-    public static final boolean REGISTRATION_NOT_CALLED = false;
-    public static final boolean REGISTRATION_CALLED = true;
-
     /**
      * Unique identifier of this client.
      * The client and server in the exchange must NOT share the same id.
@@ -167,10 +161,6 @@ public class Owl_Client
      * See the <tt>STATE_*</tt> constants for possible values.
      */
     private int state;
-    /**
-     * Checks if user registration is called more than once.
-     */
-    private boolean registrationState;
     /**
      *  The raw key K used to calculate a session key.
      */
@@ -310,7 +300,6 @@ public class Owl_Client
         this.random = random;
 
         this.state = STATE_INITIALISED;
-        this.registrationState = REGISTRATION_NOT_CALLED;
     }
 
     /**
@@ -321,41 +310,6 @@ public class Owl_Client
     {
         return this.state;
     }
-
-    /**
-     * Check's the status of the user registration
-     * I.E. whether or not this server has registered a user already.
-     * See the <tt>REGSITRATION_*</tt> constants for possible values.
-     */
-    public boolean getRegistrationState()
-    {
-        return this.registrationState;
-    }
-
-    /**
-     * Initiates user registration with the server. Creates the registration payload {@link Owl_InitialRegistration} and sends it to the server.
-     * MUST be sent over a secure channel.
-     * <p>
-     * Must be called prior to {@link #registerUseronServer(Owl_InitialRegistration)}
-     * @throws IllegalStateException if this function is called more than once
-     */
-    public Owl_InitialRegistration initiateUserRegistration(String username, char[] password)
-    {
-        if(this.registrationState)
-        {
-            throw new IllegalStateException("User login registration already begun by "+ clientId);
-        }
-        BigInteger t = calculateT(username, password);
-
-        BigInteger pi = Owl_Util.calculatePi(n,t,digest);
-
-        ECPoint gt = Owl_Util.calculateGx(g, t);
-
-        this.registrationState = REGISTRATION_CALLED;
-
-        return new Owl_InitialRegistration(clientId, pi, gt);
-    }
-
     /**
      * Creates and returns the payload to send to the server as part of the second pass of the protocol.
      * <p>
@@ -372,7 +326,7 @@ public class Owl_Client
         }
         this.t = calculateT();
 
-        this.pi = Owl_Util.calculatePi(n,t, digest);
+        this.pi = calculatePi();
 
         this.x1 = Owl_Util.generateX1(n, random);
         this.x2 = Owl_Util.generateX1(n, random);
@@ -408,7 +362,7 @@ public class Owl_Client
         }
         if (this.state < STATE_LOGIN_INITIALISED)
         {
-            throw new IllegalStateException("Must initialise login authetnication before calling authentication finish for: " + clientId);
+            throw new IllegalStateException("Must initialise login authentication before calling authentication finish for: " + clientId);
         }
         this.serverId = authenticationServerResponse.getServerId();
         this.gx3 = authenticationServerResponse.getGx3();
@@ -605,12 +559,13 @@ public class Owl_Client
             throw Exceptions.illegalStateException(e.getMessage(), e);
         }
     }
-    private BigInteger calculateT(String username, char[] password)
+
+    private BigInteger calculatePi()
     {
         try 
         {
-            return Owl_Util.calculateT(n, username + new String(password), digest);
-        } 
+            return Owl_Util.calculatePi(n, t, digest);
+        }
         catch (CryptoException e)
         {
             throw Exceptions.illegalStateException(e.getMessage(), e);
