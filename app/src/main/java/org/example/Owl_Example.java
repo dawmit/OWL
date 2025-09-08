@@ -27,6 +27,8 @@ public class Owl_Example {
          * 
          * Pick an appropriate elliptic curve to use throughout the exchange.
          * Note that both participants must use the same group.
+         * Note that the same curve must be used between user registration,
+         * user login and user password update.
          */
         Owl_Curve curve = Owl_Curves.NIST_P256;
 
@@ -112,8 +114,8 @@ public class Owl_Example {
         /*
          * Second Pass
          * The server validates the clients initial payload, and takes as input 
-         * the internally stored client data from the server. It then creates and
-         * sends its own payload back to the client.
+         * the internally stored client data from the server. It validates the payload recieved from the client.
+         * It then creates and sends its own payload back to the client.
          */
 
         Owl_AuthenticationServerResponse serverLoginResponse = server.authenticationServerResponse(clientLoginStart, serverUserRegistration);
@@ -136,6 +138,7 @@ public class Owl_Example {
          * The client recieves and valildates the server's response.
          * It then creates and sends the final payload of the handshake
          * (not including the explicit key confirmation).
+         * The server recieves this payload, validates it and uses it to calculate it's own key.
          */
 
         Owl_AuthenticationFinish clientLoginEnd = client.authenticationFinish(serverLoginResponse);

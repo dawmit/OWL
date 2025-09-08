@@ -5,16 +5,17 @@ import java.math.BigInteger;
 import org.bouncycastle.math.ec.ECPoint;
 
 /**
- * The payload sent/received during the third pass of a Owl exchange.
+ * The payload sent/received during the third pass of an Owl exchange.
  * <p>
  * Each {@link Owl_Client} creates and sends an instance
- * of this payload to the other {@link Owl_Server} and verifies the previous payload
+ * of this payload to the {@link Owl_Server} and verifies the previous payload
  * {@link Owl_AuthenticationServerResponse}.
  * The payload to send should be created via
  * {@link Owl_Client#authenticationFinish(Owl_AuthenticationServerResponse)}.
  * <p>
  * Each {@link Owl_Client} must also validate the payload
- * received from the {@link Owl_Server} this is done by the same previous function.
+ * received from the {@link Owl_Server} this is done by the same function
+ * {@link Owl_Client#authenticationFinish(Owl_AuthenticationServerResponse)}.
  */
 public class Owl_AuthenticationFinish
 {
@@ -39,8 +40,6 @@ public class Owl_AuthenticationFinish
      * The value of r = x1 - t.h mod n
      */
     private final BigInteger r;
-
-
 
     public Owl_AuthenticationFinish(
         String clientId,

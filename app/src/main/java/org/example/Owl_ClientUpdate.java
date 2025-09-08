@@ -11,55 +11,16 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Exceptions;
-/**
- * A client in the Owl PAKE protocol specifically for the user registration phase.
- * <p>
- * The Owl exchange is defined by Feng Hao and Peter Ryan in the paper
- * <a href="https://eprint.iacr.org/2023/768.pdf">
- * "Owl: An Augmented Password-Authenticated Key Exchange Scheme"</a>
- * <p>
- * The Owl protocol is asymmetric.
- * There is one client and one server communicating between each other.
- * An instance of {@link Owl_ServerRegistration} represents one server, and
- * an instance of {@link Owl_ClientRegistration} represents one client.
- * These together make up the main machine through which user registration is facilitated.
- * <p>
- * To execute the registration, construct an {@link Owl_ServerRegistration} on the server end,
- * and construct an {@link Owl_ClientRegistration} on the client end.
- * Each Owl registration will need a new and distinct {@link Owl_ServerRegistration} and {@link Owl_ClientRegistration}.
- * You cannot use the same {@link Owl_ServerRegistration} or {@link Owl_ClientRegistration} for multiple exchanges.
- * There are three distinct actions that can be taken: user registration - where the client registers
- * as a new user on the server; login - where an existing user (client) attempts to login and the Owl protocol authenticates this
- * exchange; and password update - where the user (client) can update their password.
- * <p>
- * For user login go to {@link Owl_Client} and {@link Owl_Server}.
- * To execute the user registration phase, both
- * {@link Owl_ServerRegistration} and {@link Owl_ClientRegistration} must be constructed. 
- * <p>
- * The following communication between {@link Owl_ServerRegistration} and {@link Owl_ClientRegistration}, must be
- * facilitated over a secure communications channel as the leakage of the payload sent, 
- * would allow an attacker to reconstruct the secret password.
- * <p>
- * Call the follwowing methods in this order, the client initiates every exchange. 
- * <li> {@link Owl_ClientRegistration#initiateUserRegistration()} - send payload to the server over a secure channel. </li>
- * <li> {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)} - use the payload recieved from the client to calculate a secret payload that is to be safely stored by the user of this protocol.</li>
- * <p>
- * This class is stateful and NOT threadsafe.
- * Each instance should only be used for ONE complete Owl exchange
- * (i.e. a new {@link Owl_ServerRegistration} and {@link Owl_ClientRegistration} should be constructed for each new Owl exchange).
- * <p>
- */
-public class Owl_ClientRegistration{
+
+public class Owl_ClientUpdate{
     /*
      * Possible state for user registration.
      */
-    public static final boolean REGISTRATION_NOT_CALLED = false;
-    public static final boolean REGISTRATION_CALLED = true;
+    public static final boolean UPDATE_NOT_CALLED = false;
+    public static final boolean UPDATE_CALLED = true;
     /**
      * Unique identifier of this client.
-     * <p>
      * The client and server in the exchange must NOT share the same id.
-     * </p>
      */
     private final String clientId;
     /**
@@ -72,9 +33,19 @@ public class Owl_ClientRegistration{
      */
     private char[] password;
     /**
+     * Shared secret.  This only contains the secret between construction
+     * and the call to {@link #initiateUserRegistration()}.
+     * <p>
+     * i.e. When {@link #initiateUserRegistration()} is called, this buffer overwritten with 0's,
+     * and the field is set to null.
+     * </p>
+     */
+    private char[] newPassword;
+    /**
      * Digest to use during calculations.
      */
     private final Digest digest;
+
     /**
      * Source of secure random data.
      */
@@ -87,21 +58,21 @@ public class Owl_ClientRegistration{
     private BigInteger n;
     private ECPoint g;
     /**
-     * Checks if user registration is called more than once.
+     * Checks if user update is called more than once.
      */
-    private boolean registrationState;
+    private boolean updateState;
     /**
      * Check's the status of the user registration
      * I.E. whether or not this server has registered a user already.
-     * See the <tt>REGSITRATION_*</tt> constants for possible values.
+     * See the <tt>UPDATE_*</tt> constants for possible values.
      */
-    public boolean getRegistrationState()
+    public boolean getUpdateState()
     {
-        return this.registrationState;
+        return this.updateState;
     }
 
     /**
-     * Convenience constructor for a new {@link Owl_ClientRegistration} that uses
+     * Convenience constructor for a new {@link Owl_ClientUpdate} that uses
      * the {@link Owl_Curves#NIST_P256} elliptic curve,
      * a SHA-256 digest, and a default {@link SecureRandom} implementation.
      * <p>
@@ -112,21 +83,26 @@ public class Owl_ClientRegistration{
      * @param password      shared secret.
      *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
      *                      Caller should clear the input password as soon as possible.
+     * @param newPassword   shared secret.
+     *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
+     *                      Caller should clear the input password as soon as possible.
      * @throws NullPointerException     if any argument is null
      * @throws IllegalArgumentException if password is empty
      */
-    public Owl_ClientRegistration(
+    public Owl_ClientUpdate(
         String clientId,
-        char[] password)
+        char[] password,
+        char[] newPassword)
     {
         this(
             clientId,
             password,
+            newPassword,
             Owl_Curves.NIST_P256);
     }
 
     /**
-     * Convenience constructor for a new {@link Owl_ClientRegistration} that uses
+     * Convenience constructor for a new {@link Owl_ClientUpdate} that uses
      * a SHA-256 digest and a default {@link SecureRandom} implementation.
      * <p>
      * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALISED}.
@@ -136,32 +112,40 @@ public class Owl_ClientRegistration{
      * @param password      shared secret.
      *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
      *                      Caller should clear the input password as soon as possible.
+     * @param newPassword   shared secret.
+     *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
+     *                      Caller should clear the input password as soon as possible.
      * @param curve         elliptic curve
      *                      See {@link Owl_Curves} for standard curves.
      * @throws NullPointerException     if any argument is null
      * @throws IllegalArgumentException if password is empty
      */
-    public Owl_ClientRegistration(
+    public Owl_ClientUpdate(
         String clientId,
         char[] password,
+        char[] newPassword,
         Owl_Curve curve)
     {
         this(
             clientId,
             password,
+            newPassword,
             curve,
             SHA256Digest.newInstance(),
             CryptoServicesRegistrar.getSecureRandom());
     }
 
     /**
-     * Construct a new {@link Owl_ClientRegistration}.
+     * Construct a new {@link Owl_ClientUpdate}.
      * <p>
      * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALISED}.
      *
      * @param clientId unique identifier of this client.
      *                      The server and client in the exchange must NOT share the same id.
      * @param password      shared secret.
+     *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
+     *                      Caller should clear the input password as soon as possible.
+     * @param newPassword   shared secret.
      *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
      *                      Caller should clear the input password as soon as possible.
      * @param curve         elliptic curve.
@@ -171,21 +155,27 @@ public class Owl_ClientRegistration{
      * @throws NullPointerException     if any argument is null
      * @throws IllegalArgumentException if password is empty
      */
-    public Owl_ClientRegistration(
+    public Owl_ClientUpdate(
         String clientId,
         char[] password,
+        char[] newPassword,
         Owl_Curve curve,
         Digest digest,
         SecureRandom random)
     {
         Owl_Util.validateNotNull(clientId, "clientId");
         Owl_Util.validateNotNull(password, "password");
+        Owl_Util.validateNotNull(newPassword, "new password");
         Owl_Util.validateNotNull(curve, "curve params");
         Owl_Util.validateNotNull(digest, "digest");
         Owl_Util.validateNotNull(random, "random");
         if (password.length == 0)
         {
             throw new IllegalArgumentException("Password must not be empty.");
+        }
+        if (newPassword.length ==0)
+        {
+            throw new IllegalArgumentException("New password must not be empty.");
         }
 
         this.clientId = clientId;
@@ -194,22 +184,23 @@ public class Owl_ClientRegistration{
          * Create a defensive copy so as to fully encapsulate the password.
          *
          * This array will contain the password for the lifetime of this
-         * client BEFORE {@link #initiateUserRegistration()} is called.
+         * client BEFORE {@link #calculateKeyingMaterial()} is called.
          *
-         * i.e. When {@link #initiateUserRegistration()} is called, the array will be cleared
+         * i.e. When {@link #calculateKeyingMaterial()} is called, the array will be cleared
          * in order to remove the password from memory.
          *
          * The caller is responsible for clearing the original password array
          * given as input to this constructor.
          */
         this.password = Arrays.copyOf(password, password.length);
+        this.newPassword = Arrays.copyOf(newPassword, newPassword.length);
         this.g = curve.getG();
         this.n = curve.getN();
 
         this.digest = digest;
         this.random = random;
 
-        this.registrationState = REGISTRATION_NOT_CALLED;
+        this.updateState = UPDATE_NOT_CALLED;
     }
     /**
      * Initiates user registration with the server. Creates the registration payload {@link Owl_InitialRegistration} and sends it to the server.
@@ -218,11 +209,11 @@ public class Owl_ClientRegistration{
      * Must be called prior to {@link #registerUseronServer(Owl_InitialRegistration)}
      * @throws IllegalStateException if this function is called more than once
      */
-    public Owl_InitialRegistration initiateUserRegistration()
+    public Owl_InitialRegistration initiatePasswordUpdate()
     {
-        if(this.registrationState)
+        if(this.updateState)
         {
-            throw new IllegalStateException("User login registration already begun by "+ clientId);
+            throw new IllegalStateException("Password update already begun by "+ clientId);
         }
         this.t = calculateT();
 
@@ -237,8 +228,10 @@ public class Owl_ClientRegistration{
          */
         Arrays.fill(password, (char)0);
         this.password = null;
-        this.t = null;
-        this.registrationState = REGISTRATION_CALLED;
+        Arrays.fill(newPassword, (char)0);
+        this.newPassword = null;
+        
+        this.updateState = UPDATE_CALLED;
 
         return new Owl_InitialRegistration(clientId, pi, gt);
     }

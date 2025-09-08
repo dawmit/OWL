@@ -18,8 +18,10 @@ import org.bouncycastle.util.Strings;
  * Primitives needed for an Owl exchange.
  * <p>
  * The recommended way to perform an Owl exchange is by using
- * a {@link Owl_Server} and {@link Owl_Client}.  Internally, those two classes
- * call these primitive operations in {@link Owl_Util}.
+ * an {@link Owl_Server} and {@link Owl_Client} 
+ * (and for user registration {@link Owl_ClientRegistration} and {@link Owl_ServerRegistration}).  
+ * Internally, those two classes call these primitive 
+ * operations in {@link Owl_Util}.
  * <p>
  * The primitives, however, can be used without a {@link Owl_Server}
  * or {@link Owl_Client} if needed.
@@ -56,6 +58,7 @@ public class Owl_Util
 
     /**
      * Calculate Galpha or Gbeta as done in second pass of the protocol.
+     * @throws CryptoException  if any of the parameters are the infinity point on the elliptic curve.
      */
     public static ECPoint calculateGA(
         ECPoint gx1,
@@ -81,7 +84,7 @@ public class Owl_Util
 
 
     /**
-     * Calculate x2 * pi as done in round 2.
+     * Calculate x2 * pi as done in second pass of Owl.
      */
     public static BigInteger calculateX2s(
         BigInteger n,
@@ -135,9 +138,7 @@ public class Owl_Util
             throw new CryptoException("MUST ensure that pi is not equal to 0 modulo n");
         }
         return pi;
-
     }
-
     /**
      * Calculate a zero knowledge proof of x using Schnorr's signature.
      * The returned object has two fields {g^v, r = v-x*h} for x.
@@ -381,7 +382,7 @@ public class Owl_Util
 
     /**
      * Calculates the keying material, which can be done after {@link Owl_Client#authenticationFinsish(Owl_AuthenticationServerResponse)} has completed
-     * for client and when {@link Owl_Server#authenticationServerEnd(Owl_AuthenticationFinish)}.
+     * for client and when {@link Owl_Server#authenticationServerEnd(Owl_AuthenticationFinish)} has completed for server.
      * A session key must be derived from this key material using a secure key derivation function (KDF).
      * The KDF used to derive the key is handled externally (i.e. not by {@link Owl_Server} or {@link Owl_Client}).
      * <pre>
@@ -399,7 +400,7 @@ public class Owl_Util
 
     /**
      * Calculates the 'transcipt' which is, in order, everything communicated between the two parties
-     * in the login authentication protocol used to compute a commonsession key. 
+     * in the login authentication protocol used to compute a common session key. 
      * Transcript is required for the caluclation of r, as a compiler is used
      * to prove the knowledge of t in an assymetric setting.
      * For more information: <a href= "https://eprint.iacr.org/2023/768.pdf"> Owl: An Augmented Password-Authenticated 
@@ -467,7 +468,7 @@ public class Owl_Util
 
     /**
      * Validates r my checking g^r . Gt^h equals gx1
-     * @throws CryptoException if the validation fails i.e the values do not equal.
+     * @throws CryptoException  if the validation fails i.e the values do not equal.
      */
     public static void validateR(
         BigInteger r, 

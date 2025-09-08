@@ -16,6 +16,9 @@ public class Owl_AuthenticationInitiate
 
     /**
      * Unique identifier for the client (this is the username)
+     * <p>
+     * ClientId must not be the same as the server unique identifier,
+     * </p>
      */
     private final String clientId;
 

@@ -11,7 +11,44 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Exceptions;
-
+/**
+ * A server in the Owl PAKE protocol specifically for the user registration phase.
+ * <p>
+ * The Owl exchange is defined by Feng Hao and Peter Ryan in the paper
+ * <a href="https://eprint.iacr.org/2023/768.pdf">
+ * "Owl: An Augmented Password-Authenticated Key Exchange Scheme"</a>
+ * <p>
+ * The Owl protocol is asymmetric.
+ * There is one client and one server communicating between each other.
+ * An instance of {@link Owl_ServerRegistration} represents one server, and
+ * an instance of {@link Owl_ClientRegistration} represents one client.
+ * These together make up the main machine through which user registration is facilitated.
+ * <p>
+ * To execute the registration, construct an {@link Owl_ServerRegistration} on the server end,
+ * and construct an {@link Owl_ClientRegistration} on the client end.
+ * Each Owl registration will need a new and distinct {@link Owl_ServerRegistration} and {@link Owl_ClientRegistration}.
+ * You cannot use the same {@link Owl_ServerRegistration} or {@link Owl_ClientRegistration} for multiple exchanges.
+ * There are three distinct actions that can be taken: user registration - where the client registers
+ * as a new user on the server; login - where an existing user (client) attempts to login and the Owl protocol authenticates this
+ * exchange; and password update - where the user (client) can update their password.
+ * <p>
+ * For user login go to {@link Owl_Client} and {@link Owl_Server}.
+ * To execute the user registration phase, both
+ * {@link Owl_ServerRegistration} and {@link Owl_ClientRegistration} must be constructed. 
+ * <p>
+ * The following communication between {@link Owl_ServerRegistration} and {@link Owl_ClientRegistration}, must be
+ * facilitated over a secure communications channel as the leakage of the payload sent, 
+ * would allow an attacker to reconstruct the secret password.
+ * <p>
+ * Call the follwowing methods in this order, the client initiates every exchange. 
+ * <li> {@link Owl_ClientRegistration#initiateUserRegistration()} - send payload to the server over a secure channel. </li>
+ * <li> {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)} - use the payload recieved from the client to calculate a secret payload that is to be safely stored by the user of this protocol.</li>
+ * <p>
+ * This class is stateful and NOT threadsafe.
+ * Each instance should only be used for ONE complete Owl exchange
+ * (i.e. a new {@link Owl_ServerRegistration} and {@link Owl_ClientRegistration} should be constructed for each new Owl exchange).
+ * <p>
+ */
 public class Owl_ServerRegistration
 {
    /*

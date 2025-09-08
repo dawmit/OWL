@@ -5,18 +5,23 @@ import java.math.BigInteger;
 import org.bouncycastle.math.ec.ECPoint;
 
 /**
- * The payload sent/received during the user login registration of a Owl exchange.
+ * The final payload sent by the {@link Owl_ServerRegistration} during the user login registration of a Owl exchange.
+ * This payload is to be stored securely by the server.
  * <p>
- * Each {@link Owl_Server} creates and sends an instance
- * of this payload to the {@link Owl_Client}.
+ * Each {@link Owl_ServerRegistration} creates and sends an instance
+ * of this payload ot be stored securely.
  * The payload to send should be created via
- * {@link Owl_Server#registerUseronServer(Owl_InitialRegistration)}.
+ * {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)}.
  * <p>
- * The created payload shou;d be securely stored on the server.
  */
 public class Owl_FinishRegistration
 {
-
+    /**
+     * Unique identifier for the client in this registration phase.
+     * <p>
+     * Must be different to the server's unique identifier.
+     * </p>
+     */
     private final String clientId;
 
     /**

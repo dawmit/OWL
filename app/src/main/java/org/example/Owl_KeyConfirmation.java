@@ -19,7 +19,7 @@ public class Owl_KeyConfirmation
 {
 
     /**
-     * The id of the {@link ECJPAKEParticipant} who created/sent this payload.
+     * The id of either {@link Owl_Client} or {@link Owl_Server} who created/sent this payload.
      */
     private final String id;
 

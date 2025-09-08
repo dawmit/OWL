@@ -8,7 +8,7 @@ import org.bouncycastle.math.ec.ECPoint;
  * Package protected class containing zero knowledge proof, for an Owl exchange.
  * <p>
  * This class encapsulates the values involved in the Schnorr
- * zero-knowledge proof used in the EC J-PAKE protocol.
+ * zero-knowledge proof used in the Owl protocol.
  * <p>
  */
 public class ECSchnorrZKP
