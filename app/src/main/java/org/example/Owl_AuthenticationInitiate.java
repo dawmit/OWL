@@ -9,7 +9,6 @@ import org.bouncycastle.math.ec.ECPoint;
  * of this payload to the {@link Owl_Server}.
  * The payload to send should be created via
  * {@link Owl_Client#authenticationInitiate()}.
- * <p>
  */
 public class Owl_AuthenticationInitiate
 {

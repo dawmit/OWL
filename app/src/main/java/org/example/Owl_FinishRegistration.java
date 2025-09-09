@@ -12,7 +12,6 @@ import org.bouncycastle.math.ec.ECPoint;
  * of this payload ot be stored securely.
  * The payload to send should be created via
  * {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)}.
- * <p>
  */
 public class Owl_FinishRegistration
 {

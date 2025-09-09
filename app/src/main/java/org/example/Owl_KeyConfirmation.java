@@ -8,12 +8,14 @@ import java.math.BigInteger;
  * Both {@link Owl_Client} and {@link Owl_Server} create and send an instance
  * of this payload to the other.
  * The payload to send should be created via
- * {@link #intitiateKeyConfirmation(BigInteger)}
+ * {@link Owl_Client#initiateKeyConfirmation(BigInteger)}
+ * or {@link Owl_Server#initiateKeyConfirmation(BigInteger)}.
  * <p>
  * Both {@link Owl_Client} and {@link Owl_Server} must also validate the payload
  * received from the other.
  * The received payload should be validated via
- * {@link #validateKeyConfirmation(Owl_KeyConfirmation, BigInteger)}
+ * {@link Owl_Client#validateKeyConfirmation(Owl_KeyConfirmation, BigInteger)}
+ * {@link Owl_Server#validateKeyConfirmation(Owl_KeyConfirmation, BigInteger)}
  */
 public class Owl_KeyConfirmation
 {

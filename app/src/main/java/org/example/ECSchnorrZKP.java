@@ -9,7 +9,6 @@ import org.bouncycastle.math.ec.ECPoint;
  * <p>
  * This class encapsulates the values involved in the Schnorr
  * zero-knowledge proof used in the Owl protocol.
- * <p>
  */
 public class ECSchnorrZKP
 {

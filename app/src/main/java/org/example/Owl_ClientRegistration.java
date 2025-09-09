@@ -40,14 +40,15 @@ import org.bouncycastle.util.Exceptions;
  * facilitated over a secure communications channel as the leakage of the payload sent, 
  * would allow an attacker to reconstruct the secret password.
  * <p>
- * Call the follwowing methods in this order, the client initiates every exchange. 
+ * Call the follwowing methods in this order, the client initiates every exchange.
+ * <ul>
  * <li> {@link Owl_ClientRegistration#initiateUserRegistration()} - send payload to the server over a secure channel. </li>
  * <li> {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)} - use the payload recieved from the client to calculate a secret payload that is to be safely stored by the user of this protocol.</li>
+ * </ul>
  * <p>
  * This class is stateful and NOT threadsafe.
  * Each instance should only be used for ONE complete Owl exchange
  * (i.e. a new {@link Owl_ServerRegistration} and {@link Owl_ClientRegistration} should be constructed for each new Owl exchange).
- * <p>
  */
 public class Owl_ClientRegistration{
     /*
@@ -93,7 +94,7 @@ public class Owl_ClientRegistration{
     /**
      * Check's the status of the user registration
      * I.E. whether or not this server has registered a user already.
-     * See the <tt>REGSITRATION_*</tt> constants for possible values.
+     * See the <code>REGSITRATION_*</code> constants for possible values.
      */
     public boolean getRegistrationState()
     {
@@ -105,12 +106,12 @@ public class Owl_ClientRegistration{
      * the {@link Owl_Curves#NIST_P256} elliptic curve,
      * a SHA-256 digest, and a default {@link SecureRandom} implementation.
      * <p>
-     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALISED}.
+     * After construction, the {@link #getRegistrationState() state} will be  {@link #REGISTRATION_NOT_CALLED}.
      *
      * @param clientId unique identifier of this client.
      *                      The server and client in the exchange must NOT share the same id.
      * @param password      shared secret.
-     *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
+     *                      A defensive copy of this array is made (and cleared once {@link #initiateUserRegistration()} is called).
      *                      Caller should clear the input password as soon as possible.
      * @throws NullPointerException     if any argument is null
      * @throws IllegalArgumentException if password is empty
@@ -129,12 +130,12 @@ public class Owl_ClientRegistration{
      * Convenience constructor for a new {@link Owl_ClientRegistration} that uses
      * a SHA-256 digest and a default {@link SecureRandom} implementation.
      * <p>
-     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALISED}.
+     * After construction, the {@link #getRegistrationState() state} will be  {@link #REGISTRATION_NOT_CALLED}.
      *
      * @param clientId unique identifier of this client..
      *                      The server and client in the exchange must NOT share the same id.     
      * @param password      shared secret.
-     *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
+     *                      A defensive copy of this array is made (and cleared once {@link #initiateUserRegistration()} is called).
      *                      Caller should clear the input password as soon as possible.
      * @param curve         elliptic curve
      *                      See {@link Owl_Curves} for standard curves.
@@ -157,12 +158,12 @@ public class Owl_ClientRegistration{
     /**
      * Construct a new {@link Owl_ClientRegistration}.
      * <p>
-     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALISED}.
+     * After construction, the {@link #getRegistrationState() registrationState} will be  {@link #REGISTRATION_NOT_CALLED}.
      *
      * @param clientId unique identifier of this client.
      *                      The server and client in the exchange must NOT share the same id.
      * @param password      shared secret.
-     *                      A defensive copy of this array is made (and cleared once {@link #calculateKeyingMaterial()} is called).
+     *                      A defensive copy of this array is made (and cleared once {@link #initiateUserRegistration()} is called).
      *                      Caller should clear the input password as soon as possible.
      * @param curve         elliptic curve.
      *                      See {@link Owl_Curves} for standard curves
@@ -215,7 +216,7 @@ public class Owl_ClientRegistration{
      * Initiates user registration with the server. Creates the registration payload {@link Owl_InitialRegistration} and sends it to the server.
      * MUST be sent over a secure channel.
      * <p>
-     * Must be called prior to {@link #registerUseronServer(Owl_InitialRegistration)}
+     * Must be called prior to {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)}
      * @throws IllegalStateException if this function is called more than once
      */
     public Owl_InitialRegistration initiateUserRegistration()

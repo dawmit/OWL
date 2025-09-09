@@ -40,14 +40,15 @@ import org.bouncycastle.util.Exceptions;
  * facilitated over a secure communications channel as the leakage of the payload sent, 
  * would allow an attacker to reconstruct the secret password.
  * <p>
- * Call the follwowing methods in this order, the client initiates every exchange. 
- * <li> {@link Owl_ClientRegistration#initiateUserRegistration()} - send payload to the server over a secure channel. </li>
- * <li> {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)} - use the payload recieved from the client to calculate a secret payload that is to be safely stored by the user of this protocol.</li>
+ * Call the following methods in this order, the client initiates every exchange:
+ * <ul>
+ *   <li>{@link Owl_ClientRegistration#initiateUserRegistration()} - send payload to the server over a secure channel.</li>
+ *   <li>{@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)} - use the payload received from the client to calculate a secret payload that is to be safely stored by the user of this protocol.</li>
+ * </ul>
  * <p>
  * This class is stateful and NOT threadsafe.
  * Each instance should only be used for ONE complete Owl exchange
  * (i.e. a new {@link Owl_ServerRegistration} and {@link Owl_ClientRegistration} should be constructed for each new Owl exchange).
- * <p>
  */
 public class Owl_ServerRegistration
 {
@@ -80,7 +81,7 @@ public class Owl_ServerRegistration
     /**
      * Check's the status of the user registration
      * I.E. whether or not this server has registered a user already.
-     * See the <tt>REGSITRATION_*</tt> constants for possible values.
+     * See the <code>REGSITRATION_*</code> constants for possible values.
      */
 
     public boolean getRegistrationState()
@@ -92,7 +93,7 @@ public class Owl_ServerRegistration
      * the {@link Owl_Curves#NIST_P256} elliptic curve,
      * a SHA-256 digest, and a default {@link SecureRandom} implementation.
      * <p>
-     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALISED}.
+     * After construction, the {@link #getRegistrationState() registrationState} will be  {@link #REGISTRATION_NOT_CALLED}.
      *
      * @param serverId unique identifier of this server.
      *                      The server and client in the exchange must NOT share the same id.
@@ -110,7 +111,7 @@ public class Owl_ServerRegistration
      * Convenience constructor for a new {@link Owl_ServerRegistration} that uses
      * a SHA-256 digest and a default {@link SecureRandom} implementation.
      * <p>
-     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALISED}.
+     * After construction, the {@link #getRegistrationState() registrationState} will be  {@link #REGISTRATION_NOT_CALLED}.
      *
      * @param serverId unique identifier of this server.
      *                      The server and client in the exchange must NOT share the same id.
@@ -132,7 +133,7 @@ public class Owl_ServerRegistration
     /**
      * Construct a new {@link Owl_ServerRegistration}.
      * <p>
-     * After construction, the {@link #getState() state} will be  {@link #STATE_INITIALISED}.
+     * After construction, the {@link #getRegistrationState() registrationState} will be  {@link #REGISTRATION_NOT_CALLED}.
      *
      * @param serverId unique identifier of this server.
      *                      The client and server in the exchange must NOT share the same id.
@@ -172,7 +173,7 @@ public class Owl_ServerRegistration
     /**
      * Recieves the payload sent by the client as part of user registration, and stores necessary values away in the server (upto the user of this protocol).
      * <p>
-     * Must be called after {@link #initiateUserRegistration()} by the {@link Owl_Client}.
+     * Must be called after {@link Owl_ClientRegistration#initiateUserRegistration()} by the {@link Owl_Client}.
      * @throws IllegalStateException if this functions is called more than once.
      */
     public Owl_FinishRegistration registerUseronServer(

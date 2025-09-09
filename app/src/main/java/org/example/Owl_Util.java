@@ -34,7 +34,7 @@ public class Owl_Util
     /**
      * Return a value that can be used as x1, x2, x3 or x4 during round 1.
      * <p>
-     * The returned value is a random value in the range <tt>[1, n-1]</tt>.
+     * The returned value is a random value in the range <code>[1, n-1]</code>.
      */
     public static BigInteger generateX1(
         BigInteger n,
@@ -381,7 +381,7 @@ public class Owl_Util
     }
 
     /**
-     * Calculates the keying material, which can be done after {@link Owl_Client#authenticationFinsish(Owl_AuthenticationServerResponse)} has completed
+     * Calculates the keying material, which can be done after {@link Owl_Client#authenticationFinish(Owl_AuthenticationServerResponse)} has completed
      * for client and when {@link Owl_Server#authenticationServerEnd(Owl_AuthenticationFinish)} has completed for server.
      * A session key must be derived from this key material using a secure key derivation function (KDF).
      * The KDF used to derive the key is handled externally (i.e. not by {@link Owl_Server} or {@link Owl_Client}).
