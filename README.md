@@ -2,8 +2,8 @@
 
 A Java implementation of the Owl PAKE protocol.
 
-Owl is an Augmented Password Key Exchange Protocol, developed my
-Feng Hao and Peter Ryan in this paper: [Owl: An Augmented 
+Owl is an Augmented Password Key Exchange Protocol, developed by
+Feng Hao, Samiran Bag, Liqun Chan, Paul van Oorschot, in this paper: [Owl: An Augmented 
 Password-Authenticated Key Exchange Scheme](https://eprint.iacr.org/2023/768.pdf).
 
 Functionality includes the registration of a new user on the a
