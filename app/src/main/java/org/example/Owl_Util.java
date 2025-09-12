@@ -496,6 +496,49 @@ public class Owl_Util
         rawKey = rawKey.normalize();
         return rawKey.getAffineXCoord().toBigInteger();
     }
+    /**
+     * Validates the public key T sent to {@link Owl_Server} by {@link Owl_Client} over a secure channel
+     * through the {@link Owl_ClientRegistration#initiateUserRegistration()}.
+     */
+    public static void validatePublicKey(ECPoint X, ECCurve curve, BigInteger q, BigInteger h) throws CryptoException{
+        
+        /* Public key validation based on the following paper (Sec 3)
+         * Antipa, A., Brown, D., Menezes, A., Struik, R. and Vanstone, S., 
+         * "Validation of elliptic curve public keys," PKC, 2002
+         * https://iacr.org/archive/pkc2003/25670211/25670211.pdf
+         */
+             
+        // 1. X != infinity
+        if (X.isInfinity())
+        {
+            throw new CryptoException("Zero-knowledge proof validation failed: X cannot equal infinity");
+        }
+
+        ECPoint x_normalized = X.normalize();
+        // 2. Check x and y coordinates are in Fq, i.e., x, y in [0, q-1]
+        if (x_normalized.getAffineXCoord().toBigInteger().signum() < 0 ||
+            x_normalized.getAffineXCoord().toBigInteger().compareTo(q) >= 0 ||
+            x_normalized.getAffineYCoord().toBigInteger().signum() < 0 ||
+            x_normalized.getAffineYCoord().toBigInteger().compareTo(q) >= 0)
+        {
+            throw new CryptoException("Zero-knowledge proof validation failed: x and y are not in the field");
+        }      
+        // 3. Check X lies on the curve
+        try
+        {
+            curve.decodePoint(X.getEncoded(true));
+        }
+        catch (Exception e)
+        {
+            throw new CryptoException("Zero-knowledge proof validation failed: x does not lie on the curve", e);
+        }   
+        // 4. Check that nX = infinity.
+        // It is equivalent - but more more efficient - to check the coFactor*X is not infinity
+        if (X.multiply(h).isInfinity())
+        {
+            throw new CryptoException("Zero-knowledge proof validation failed: Nx cannot be infinity");
+        }
+    }
 
     /**
      * Calculates the MacTag (to be used for key confirmation), as defined by

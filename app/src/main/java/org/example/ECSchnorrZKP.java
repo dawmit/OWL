@@ -39,7 +39,7 @@ public class ECSchnorrZKP
 
     /**
      * Returns the prover's response to the challenge c (r = v - d * c mod n where d is the private key)
-     * 
+     */
     public BigInteger getr()
     {
         return r;

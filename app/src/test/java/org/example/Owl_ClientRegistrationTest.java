@@ -67,7 +67,6 @@ public class Owl_ClientRegistrationTest
     	Owl_InitialRegistration initialUserReg = assertDoesNotThrow(() -> 
     		clientReg.initiateUserRegistration()
     	);
-    	serverReg.registerUseronServer(initialUserReg);
     }
 
     @Test

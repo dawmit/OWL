@@ -11,6 +11,7 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Exceptions;
+
 /**
  * A server in the Owl PAKE protocol specifically for the user registration phase.
  * <p>
@@ -72,6 +73,9 @@ public class Owl_ServerRegistration
      */
     private final SecureRandom random;
     
+    private ECCurve.AbstractFp ecCurve;
+    private BigInteger h;
+    private BigInteger q;
     private BigInteger n;
     private ECPoint g;
     /**
@@ -154,6 +158,9 @@ public class Owl_ServerRegistration
         Owl_Util.validateNotNull(random, "random");
 
         this.serverId = serverId;
+        this.ecCurve = curve.getCurve();
+        this.q = curve.getQ();
+        this.h = curve.getH();
         this.g = curve.getG();
         this.n = curve.getN();
 
@@ -199,6 +206,7 @@ public class Owl_ServerRegistration
         if (pi.compareTo(BigInteger.ONE)==-1 || pi.compareTo(n.subtract(BigInteger.ONE)) == 1) {
             throw new CryptoException("pi is not in the range of [1, n-1]. for " + serverId); 
         }
+        Owl_Util.validatePublicKey(gt, ecCurve, q, h);
         this.registrationState = REGISTRATION_CALLED;
 
         return new Owl_FinishRegistration(clientId, knowledgeProofForX3, gx3, pi, gt); 
