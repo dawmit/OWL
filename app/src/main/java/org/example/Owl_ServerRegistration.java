@@ -179,6 +179,7 @@ public class Owl_ServerRegistration
     public Owl_FinishRegistration registerUseronServer(
         Owl_InitialRegistration userLoginRegistrationReceived
         )
+    throws CryptoException
     {
         if(this.registrationState)
         {
@@ -194,6 +195,10 @@ public class Owl_ServerRegistration
         BigInteger pi = userLoginRegistrationReceived.getPi();
         ECPoint gt = userLoginRegistrationReceived.getGt();
 
+        Owl_Util.validateParticipantIdsDiffer(clientId, serverId);
+        if (pi.compareTo(BigInteger.ONE)==-1 || pi.compareTo(n.subtract(BigInteger.ONE)) == 1) {
+            throw new CryptoException("pi is not in the range of [1, n-1]. for " + serverId); 
+        }
         this.registrationState = REGISTRATION_CALLED;
 
         return new Owl_FinishRegistration(clientId, knowledgeProofForX3, gx3, pi, gt); 
