@@ -297,7 +297,6 @@ public class Owl_Server
 
         this.gx3 = userLoginCredentials.getGx3();
         this.pi  = userLoginCredentials.getPi();
-        //Perhaps to an explicit check for pi!= 0 ??
         this.knowledgeProofForX3 = userLoginCredentials.getKnowledgeProofForX3();
         this.gt = userLoginCredentials.getGt();
 
