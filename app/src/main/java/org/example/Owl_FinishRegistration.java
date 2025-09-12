@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import org.bouncycastle.math.ec.ECPoint;
 
 /**
- * The final payload sent by the {@link Owl_ServerRegistration} during the user login registration of a Owl exchange.
+ * The final payload sent by the {@link Owl_ServerRegistration} during the user registration of a Owl exchange.
  * This payload is to be stored securely by the server.
  * <p>
  * Each {@link Owl_ServerRegistration} creates and sends an instance

@@ -55,7 +55,8 @@ public class Owl_Example {
         System.out.println("");
 
         System.out.println("(Secret passwords used by Client: " + clientPassword + ")");
-
+        System.out.println("");
+        
         /*
          * Both participants must use the same hashing algorithm.
          * Both participants muse use the same hashing algorithm 
@@ -121,7 +122,7 @@ public class Owl_Example {
         Owl_AuthenticationServerResponse serverLoginResponse = server.authenticationServerResponse(clientLoginStart, serverUserRegistration);
 
         System.out.println("************ Second Pass **************");
-        System.out.println("Server verifies the client's KP{x1}: OK\n");
+        System.out.println("Server verifies the client's KP{x1}: OK");
         System.out.println("Server verifies the client's KP{x2}: OK\n");
         System.out.println("Server sends to Client: ");
         System.out.println("Server's unique ID: " + serverLoginResponse.getServerId());
@@ -143,51 +144,55 @@ public class Owl_Example {
         Owl_AuthenticationFinish clientLoginEnd = client.authenticationFinish(serverLoginResponse);
 
         System.out.println("************ Third Pass ************");
-        System.out.println("Client verifies the server's KP{x3}: OK\n");
-        System.out.println("Client verifies the server's KP{x3}: OK\n");
-        System.out.println("Client verifies the server's KP{Beta}: OK\n");   
+        System.out.println("Client verifies the server's KP{x3}: OK");
+        System.out.println("Client verifies the server's KP{x4}: OK");
+        System.out.println("Client verifies the server's KP{Beta}: OK\n");  
+        
+        BigInteger clientKeyingMaterial = client.calculateKeyingMaterial();
+        System.out.println("Client computes key material K=" + clientKeyingMaterial.toString(16));
+        System.out.println("");
+        
         System.out.println("Client sends to Server: ");
         System.out.println("Username used to login: " + clientLoginEnd.getClientId());
         System.out.println("Alpha="+new BigInteger(clientLoginEnd.getAlpha().getEncoded(true)).toString(16));
         System.out.println("KP{Alpha}: {V="+new BigInteger(clientLoginEnd.getKnowledgeProofForAlpha().getV().getEncoded(true)).toString(16)+", r="+clientLoginEnd.getKnowledgeProofForAlpha().getr().toString(16)+"}");
         System.out.println("r="+ clientLoginEnd.getR().toString(16));
-
-        /*
-         * After the third pass, the client computes the keying material.
-         */
-        BigInteger clientKeyingMaterial = client.calculateKeyingMaterial();
-        System.out.println("Client computes key material \t K=" + clientKeyingMaterial.toString(16));
         
         /* The client sends an explicit key confirmation string. This is optional but recommended */
         Owl_KeyConfirmation clientKCPayload = client.initiateKeyConfirmation(clientKeyingMaterial);
-        System.out.println("(client key confirmation) MacTag=" + clientKCPayload.getMacTag().toString(16));
+        System.out.println("MacTag=" + clientKCPayload.getMacTag().toString(16));
         System.out.println("");
         
         /* Fourth pass
-         * The server recieves the client payload, validates it and uses it to calculate its own key.
+         * The server receives the client payload, validates it and uses it to calculate its own key.
          * In this pass, the server may send an explicit key confirmation string. This is optional but recommended.
-         * /
+         */
+        
         System.out.println("********* Fourth Pass ***********");
         server.authenticationServerEnd(clientLoginEnd);
-        System.out.println("Server verifies the client's KP{Alpha}: OK\n");
+        System.out.println("Server verifies the client's KP{Alpha}: OK");
         System.out.println("Server verifies the client's r, {by checking g^r . T^h = gx1}: OK\n");
         
         /*
          * The server computes the keying material.
          */
         BigInteger serverKeyingMaterial = server.calculateKeyingMaterial();
-        System.out.println("Server computes key material \t K=" + serverKeyingMaterial.toString(16));
-
-        server.validateKeyConfirmation(clientKCPayload, serverKeyingMaterial);
-        System.out.println("Server checks MacTag: OK\n");
+        System.out.println("Server computes key material K=" + serverKeyingMaterial.toString(16));
+        System.out.println("");
         
         // The server computes key confirmation string
         Owl_KeyConfirmation serverKCPayload = server.initiateKeyConfirmation(serverKeyingMaterial);
-        System.out.println("(Server key confirmation) MacTag=" + serverKCPayload.getMacTag().toString(16));
+        server.validateKeyConfirmation(clientKCPayload, serverKeyingMaterial);
+        System.out.println("Server checks Client's MacTag for key confirmation: OK\n");
+        
+        System.out.println("Server sends to Client:");
+        System.out.println("MacTag=" + serverKCPayload.getMacTag().toString(16));
         System.out.println("");
 
+        System.out.println("********* After the fourth Pass ***********");
         client.validateKeyConfirmation(serverKCPayload, clientKeyingMaterial);
-        System.out.println("Client checks MacTag: OK\n");
+        System.out.println("Client checks Server's MacTag for key confirmation: OK");
+        System.out.println("");
         
         /*
          * You must derive a session key from the keying material applicable
@@ -201,6 +206,9 @@ public class Owl_Example {
         System.out.println("The client and the server has done authenticated key exchange with explicit key confirmation.");
         System.out.println("Client computes a session key \t clientKey=" + clientKey.toString(16));
         System.out.println("Server computes a session key \t Server=" + serverKey.toString(16));
+
+        System.out.println("Client's session key \t clientKey=" + clientKey.toString(16));
+        System.out.println("Server's session key \t Server=" + serverKey.toString(16));
     }
 
     private static BigInteger deriveSessionKey(BigInteger keyingMaterial)
