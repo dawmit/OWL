@@ -12,25 +12,12 @@ import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Exceptions;
 /**
- * A client in the Owl PAKE protocol specifically for the user registration phase.
- * <p>
- * The Owl exchange is defined by Feng Hao and Peter Ryan in the paper
- * <a href="https://eprint.iacr.org/2023/768.pdf">
- * "Owl: An Augmented Password-Authenticated Key Exchange Scheme"</a>
- * <p>
- * The Owl protocol is asymmetric.
- * There is one client and one server communicating between each other.
- * An instance of {@link Owl_ServerRegistration} represents one server, and
- * an instance of {@link Owl_ClientRegistration} represents one client.
- * These together make up the main machine through which user registration is facilitated.
+ * A client in the Owl augmented PAKE protocol specifically for the user registration phase.
  * <p>
  * To execute the registration, construct an {@link Owl_ServerRegistration} on the server end,
  * and construct an {@link Owl_ClientRegistration} on the client end.
  * Each Owl registration will need a new and distinct {@link Owl_ServerRegistration} and {@link Owl_ClientRegistration}.
  * You cannot use the same {@link Owl_ServerRegistration} or {@link Owl_ClientRegistration} for multiple exchanges.
- * There are three distinct actions that can be taken: user registration - where the client registers
- * as a new user on the server; login - where an existing user (client) attempts to login and the Owl protocol authenticates this
- * exchange; and password update - where the user (client) can update their password.
  * <p>
  * For user login go to {@link Owl_Client} and {@link Owl_Server}.
  * To execute the user registration phase, both
