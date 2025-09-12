@@ -134,7 +134,7 @@ public class Owl_Util
         throws CryptoException
     {
         BigInteger pi = calculateHash(t, digest).mod(n);
-        if(pi.compareTo(BigInteger.ONE)==-1 || pi.compareTo(n.subtract(BigInteger.ONE)) == 1){
+        if(pi.compareTo(BigInteger.ZERO)==0){
             throw new CryptoException("MUST ensure that pi is not equal to 0 modulo n");
         }
         return pi;

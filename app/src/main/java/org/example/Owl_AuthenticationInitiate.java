@@ -3,7 +3,7 @@ package org.example;
 import org.bouncycastle.math.ec.ECPoint;
 
 /**
- * The payload sent by the client in the authenticaion first pass by {@link Owl_Client}
+ * The payload sent by the client in the authentication first pass by {@link Owl_Client}
  * <p>
  * Each {@link Owl_Client} creates and sends an instance
  * of this payload to the {@link Owl_Server}.

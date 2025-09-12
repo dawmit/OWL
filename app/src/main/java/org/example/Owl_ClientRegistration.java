@@ -12,7 +12,12 @@ import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Exceptions;
 /**
- * A client in the Owl augmented PAKE protocol specifically for the user registration phase.
+ * A client in the Owl key exchange protocol specifically for the user registration phase.
+ * <p>
+ * There is one client and one server communicating between each other.
+ * An instance of {@link Owl_ServerRegistration} represents one server, and
+ * an instance of {@link Owl_ClientRegistration} represents one client.
+ * These together make up the main machine through which user registration is facilitated.
  * <p>
  * To execute the registration, construct an {@link Owl_ServerRegistration} on the server end,
  * and construct an {@link Owl_ClientRegistration} on the client end.
@@ -27,10 +32,10 @@ import org.bouncycastle.util.Exceptions;
  * facilitated over a secure communications channel as the leakage of the payload sent, 
  * would allow an attacker to reconstruct the secret password.
  * <p>
- * Call the follwowing methods in this order, the client initiates every exchange.
+ * Call the following methods in this order, the client initiates every exchange.
  * <ul>
  * <li> {@link Owl_ClientRegistration#initiateUserRegistration()} - send payload to the server over a secure channel. </li>
- * <li> {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)} - use the payload recieved from the client to calculate a secret payload that is to be safely stored by the user of this protocol.</li>
+ * <li> {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)} - use the payload received from the client to calculate a secret payload that is to be safely stored by the user of this protocol.</li>
  * </ul>
  * <p>
  * This class is stateful and NOT threadsafe.
@@ -54,7 +59,7 @@ public class Owl_ClientRegistration{
      * Shared secret.  This only contains the secret between construction
      * and the call to {@link #initiateUserRegistration()}.
      * <p>
-     * i.e. When {@link #initiateUserRegistration()} is called, this buffer overwritten with 0's,
+     * i.e. When {@link #initiateUserRegistration()} is called, this buffer is overwritten with 0's,
      * and the field is set to null.
      * </p>
      */
@@ -117,7 +122,7 @@ public class Owl_ClientRegistration{
      * Convenience constructor for a new {@link Owl_ClientRegistration} that uses
      * a SHA-256 digest and a default {@link SecureRandom} implementation.
      * <p>
-     * After construction, the {@link #getRegistrationState() state} will be  {@link #REGISTRATION_NOT_CALLED}.
+     * After construction, the {@link #getRegistrationState() state} will be {@link #REGISTRATION_NOT_CALLED}.
      *
      * @param clientId unique identifier of this client..
      *                      The server and client in the exchange must NOT share the same id.     

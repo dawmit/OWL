@@ -12,8 +12,8 @@ import org.bouncycastle.math.ec.ECPoint;
  * <p>
  * Each {@link Owl_Server} must also validate the payload
  * received from the {@link Owl_Client} which comes in the form of {@link Owl_AuthenticationInitiate}.
- * The {@link Owl_Server} must retreive the {@link Owl_FinishRegistration} 
- * from wherever the server securely stored the intitial login information.
+ * The {@link Owl_Server} must retrieve the {@link Owl_FinishRegistration} 
+ * from wherever the server securely stored the initial login information.
  * The received payload should be validated via the same function (in the same call).
  */
 public class Owl_AuthenticationServerResponse

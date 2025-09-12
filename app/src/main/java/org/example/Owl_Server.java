@@ -269,7 +269,7 @@ public class Owl_Server
      * <p>
      * Note that this DOES NOT detect a non-common password.
      * The only indication of a non-common password is through derivation
-     * of different keys (which can be detected explicitly by executing round 3 and round 4)
+     * of different keys (which can be detected explicitly by executing key confirmation)
      * or through the failure of validation of r (checks that g^r . T^h = gx1) in {@link Owl_Server#authenticationServerEnd}.
      * <p>
      * Must be called prior to {@link #calculateKeyingMaterial()}.
@@ -325,9 +325,9 @@ public class Owl_Server
      * Therefore, if you immediately start using a key derived from
      * the keying material, then you must handle detection of incorrect keys.
      * Validation of R also detects if passwords are different between user registration and user login.
-     * If you want to handle this detection explicitly, you can optionally perform
-     * rounds 3 and 4.  See {@link Owl_Server} for details on how to execute
-     * rounds 3 and 4.
+     * If you want to handle this detection explicitly, you can perform explicit
+     * key confirmation.  See {@link Owl_Server} for details on how to execute
+     * key confirmation.
      * <p>
      * The keying material will be in the range <code>[0, n-1]</code>.
      * <p>
@@ -365,7 +365,7 @@ public class Owl_Server
         this.rawKey = null;
 
         /*
-         * Do not clear gx* yet, since those are needed by round 3.
+         * Do not clear gx* yet, since those are needed by key confirmation.
          */
         this.state = STATE_KEY_CALCULATED;
 

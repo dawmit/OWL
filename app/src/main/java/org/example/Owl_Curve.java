@@ -93,12 +93,6 @@ public class Owl_Curve
             throw new IllegalArgumentException("The order n must be prime");
         }
 
-        /*
-         * TODO It's expensive to calculate the actual total number of points. Probably the best that could be done is
-         * checking that the point count is within the Hasse bound?
-         */
-//        BigInteger totalPoints = n.multiply(h);
-
         ECCurve.Fp curve = new ECCurve.Fp(q, a, b, n, h);
         ECPoint g = curve.createPoint(g_x, g_y);
 
