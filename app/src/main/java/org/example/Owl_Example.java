@@ -11,12 +11,12 @@ import org.bouncycastle.crypto.SavableDigest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
 /**
- * An example of an Owl exchange.
+ * An example of an Owl key exchange process.
  * <p>
- * 
  * In this example, both the client and server are on the same computer (in the same JVM, in fact).
  * In reality, they would be in different locations,
  * and would be sending their generated payloads to each other.
+ * </p>
  */
 public class Owl_Example {
 
@@ -136,9 +136,8 @@ public class Owl_Example {
         /*
          * Third Pass
          * The client recieves and valildates the server's response.
-         * It then creates and sends the final payload of the handshake
-         * (not including the explicit key confirmation).
-         * The server recieves this payload, validates it and uses it to calculate it's own key.
+         * It then creates and sends the final payload of the handshake.
+         * In the same pass, the client may send an explicit key confirmation string. This is optional but recommended.
          */
 
         Owl_AuthenticationFinish clientLoginEnd = client.authenticationFinish(serverLoginResponse);
@@ -152,23 +151,43 @@ public class Owl_Example {
         System.out.println("Alpha="+new BigInteger(clientLoginEnd.getAlpha().getEncoded(true)).toString(16));
         System.out.println("KP{Alpha}: {V="+new BigInteger(clientLoginEnd.getKnowledgeProofForAlpha().getV().getEncoded(true)).toString(16)+", r="+clientLoginEnd.getKnowledgeProofForAlpha().getr().toString(16)+"}");
         System.out.println("r="+ clientLoginEnd.getR().toString(16));
-        
-        server.authenticationServerEnd(clientLoginEnd);
 
+        /*
+         * After the third pass, the client computes the keying material.
+         */
+        BigInteger clientKeyingMaterial = client.calculateKeyingMaterial();
+        System.out.println("Client computes key material \t K=" + clientKeyingMaterial.toString(16));
+        
+        /* The client sends an explicit key confirmation string. This is optional but recommended */
+        Owl_KeyConfirmation clientKCPayload = client.initiateKeyConfirmation(clientKeyingMaterial);
+        System.out.println("(client key confirmation) MacTag=" + clientKCPayload.getMacTag().toString(16));
+        System.out.println("");
+        
+        /* Fourth pass
+         * The server recieves the client payload, validates it and uses it to calculate its own key.
+         * In this pass, the server may send an explicit key confirmation string. This is optional but recommended.
+         * /
+        System.out.println("********* Fourth Pass ***********");
+        server.authenticationServerEnd(clientLoginEnd);
         System.out.println("Server verifies the client's KP{Alpha}: OK\n");
         System.out.println("Server verifies the client's r, {by checking g^r . T^h = gx1}: OK\n");
-        /*
-         * After the third pass, each participant computes the keying material.
-         */
-
-        BigInteger clientKeyingMaterial = client.calculateKeyingMaterial();
-        BigInteger serverKeyingMaterial = server.calculateKeyingMaterial();
-
-        System.out.println("********* After Third Pass ***********");
-        System.out.println("Client computes key material \t K=" + clientKeyingMaterial.toString(16));
-        System.out.println("Server computes key material \t K=" + serverKeyingMaterial.toString(16));
-        System.out.println();
         
+        /*
+         * The server computes the keying material.
+         */
+        BigInteger serverKeyingMaterial = server.calculateKeyingMaterial();
+        System.out.println("Server computes key material \t K=" + serverKeyingMaterial.toString(16));
+
+        server.validateKeyConfirmation(clientKCPayload, serverKeyingMaterial);
+        System.out.println("Server checks MacTag: OK\n");
+        
+        // The server computes key confirmation string
+        Owl_KeyConfirmation serverKCPayload = server.initiateKeyConfirmation(serverKeyingMaterial);
+        System.out.println("(Server key confirmation) MacTag=" + serverKCPayload.getMacTag().toString(16));
+        System.out.println("");
+
+        client.validateKeyConfirmation(serverKCPayload, clientKeyingMaterial);
+        System.out.println("Client checks MacTag: OK\n");
         
         /*
          * You must derive a session key from the keying material applicable
@@ -178,43 +197,10 @@ public class Owl_Example {
         BigInteger clientKey = deriveSessionKey(clientKeyingMaterial);
         BigInteger serverKey = deriveSessionKey(serverKeyingMaterial);
         
-        /*
-         * At this point, you can stop and use the session keys if you want.
-         * This is implicit key confirmation.
-         * 
-         * If you want to explicitly confirm that the key material matches,
-         * you can continue on and perform key confirmation.
-         */
-        
-        /*
-         * Key Confirmation
-         * 
-         * Client and Server each generate a Key Confirmation payload, and send it to each other.
-         */
-
-        Owl_KeyConfirmation clientKCPayload = client.initiateKeyConfirmation(clientKeyingMaterial);
-        Owl_KeyConfirmation serverKCPayload = server.initiateKeyConfirmation(serverKeyingMaterial);
-
-        System.out.println("************ Key Confirmation **************");
-        System.out.println("Client sends to Server: ");
-        System.out.println("MacTag=" + clientKCPayload.getMacTag().toString(16));
-        System.out.println("");
-        System.out.println("Server sends to Client: ");
-        System.out.println("MacTag=" + serverKCPayload.getMacTag().toString(16));
-        System.out.println("");
-
-        /*
-         * Each participant must then validate the received payload for Key Confirmation.
-         */
-
-        client.validateKeyConfirmation(serverKCPayload, clientKeyingMaterial);
-        System.out.println("Client checks MacTag: OK\n");
-
-        server.validateKeyConfirmation(clientKCPayload, serverKeyingMaterial);
-        System.out.println("Server checks MacTag: OK\n");
-
         System.out.println();
-        System.out.println("MacTags validated, therefore the keying material matches.");
+        System.out.println("The client and the server has done authenticated key exchange with explicit key confirmation.");
+        System.out.println("Client computes a session key \t clientKey=" + clientKey.toString(16));
+        System.out.println("Server computes a session key \t Server=" + server.toString(16));
     }
 
     private static BigInteger deriveSessionKey(BigInteger keyingMaterial)
