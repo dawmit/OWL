@@ -200,7 +200,7 @@ public class Owl_Example {
         System.out.println();
         System.out.println("The client and the server has done authenticated key exchange with explicit key confirmation.");
         System.out.println("Client computes a session key \t clientKey=" + clientKey.toString(16));
-        System.out.println("Server computes a session key \t Server=" + server.toString(16));
+        System.out.println("Server computes a session key \t Server=" + serverKey.toString(16));
     }
 
     private static BigInteger deriveSessionKey(BigInteger keyingMaterial)
