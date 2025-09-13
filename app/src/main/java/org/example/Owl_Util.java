@@ -689,7 +689,7 @@ public class Owl_Util
         Arrays.fill(byteArray, (byte)0);
     }
 
-    private static byte[] intToByteArray(int value)
+    protected static byte[] intToByteArray(int value)
     {
         return new byte[]{
             (byte)(value >>> 24),

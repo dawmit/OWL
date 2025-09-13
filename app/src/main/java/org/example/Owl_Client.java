@@ -557,7 +557,10 @@ public class Owl_Client
     {
         try 
         {
-            return Owl_Util.calculateT(n, clientId + new String(password), digest);
+        	// t = H(username||password). Prepend each item with its byte length (int) to set clear boundary
+            return Owl_Util.calculateT(n, 
+            		String.valueOf(clientId.getBytes().length) + clientId + 
+            		String.valueOf(password.length) + new String(password), digest);
         } 
         catch (CryptoException e)
         {
