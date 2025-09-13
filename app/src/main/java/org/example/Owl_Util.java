@@ -273,43 +273,9 @@ public class Owl_Util
         /* ZKP: {V=G*v, r} */
         BigInteger h = calculateHashForZeroknowledgeProof(generator, V, X, userID, digest);
 
-        /* Public key validation based on the following paper (Sec 3)
-         * Antipa A., Brown D., Menezes A., Struik R. and Vanstone S.
-         * "Validation of elliptic curve public keys", PKC, 2002
-         * https://iacr.org/archive/pkc2003/25670211/25670211.pdf
-         */
-        // 1. X != infinity
-        if (X.isInfinity())
-        {
-            throw new CryptoException("Zero-knowledge proof validation failed: X cannot equal infinity");
-        }
-
-        ECPoint x_normalized = X.normalize();
-        // 2. Check x and y coordinates are in Fq, i.e., x, y in [0, q-1]
-        if (x_normalized.getAffineXCoord().toBigInteger().signum() < 0 ||
-            x_normalized.getAffineXCoord().toBigInteger().compareTo(q) >= 0 ||
-            x_normalized.getAffineYCoord().toBigInteger().signum() < 0 ||
-            x_normalized.getAffineYCoord().toBigInteger().compareTo(q) >= 0)
-        {
-            throw new CryptoException("Zero-knowledge proof validation failed: x and y are not in the field");
-        }
-
-        // 3. Check X lies on the curve
-        try
-        {
-            curve.decodePoint(X.getEncoded(true));
-        }
-        catch (Exception e)
-        {
-            throw new CryptoException("Zero-knowledge proof validation failed: x does not lie on the curve", e);
-        }
-
-        // 4. Check that nX = infinity.
-        // It is equivalent - but more efficient - to check the coFactor*X is not infinity
-        if (X.multiply(coFactor).isInfinity())
-        {
-            throw new CryptoException("Zero-knowledge proof validation failed: Nx cannot be infinity");
-        }
+        // First, ensure X is a valid public key
+        validatePublicKey(X, curve, q, BigInteger coFactor);
+        
         // Now check if V = G*r + X*h.
         // Given that {G, X} are valid points on the curve, the equality implies that V is also a point on the curve.
         if (!V.equals(generator.multiply(r).add(X.multiply(h.mod(n)))))
@@ -499,7 +465,7 @@ public class Owl_Util
     /**
      * Validates that an EC point X is a valid public key on the designated elliptic curve.
      */
-    public static void validatePublicKey(ECPoint X, ECCurve curve, BigInteger q, BigInteger h) throws CryptoException{
+    public static void validatePublicKey(ECPoint X, ECCurve curve, BigInteger q, BigInteger coFactor) throws CryptoException{
         
         /* Public key validation based on the following paper (Sec 3)
          * Antipa, A., Brown, D., Menezes, A., Struik, R. and Vanstone, S., 
@@ -533,7 +499,7 @@ public class Owl_Util
         }   
         // 4. Check that nX = infinity.
         // It is equivalent - but more efficient - to check the coFactor*X is not infinity
-        if (X.multiply(h).isInfinity())
+        if (X.multiply(coFactor).isInfinity())
         {
             throw new CryptoException("Public key validation failed: it is in a small order group");
         }
