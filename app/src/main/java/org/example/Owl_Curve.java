@@ -45,7 +45,15 @@ public class Owl_Curve
      * However, due to the small uncertainties if p and q are not prime,
      * advanced attacks are not prevented.
      * Use it at your own risk.
-     *
+     * 
+     * @param q The prime field modulus 
+     * @param a The curve coefficient a
+     * @param b The curve coefficient b
+     * @param n The order of the base point G
+     * @param h The co-factor
+     * @param g_x The x coordinate of the base point G
+     * @param g_y The y coordinate of the base point G
+	 * 
      * @throws NullPointerException     if any argument is null
      * @throws IllegalArgumentException if any of the above validations fail
      */
@@ -121,36 +129,64 @@ public class Owl_Curve
         this.g = g;
     }
 
+    /**
+     * Get the elliptic curve
+     * @return The curve
+     */
     public ECCurve.AbstractFp getCurve()
     {
         return curve;
     }
 
+    /**
+     * Get the base point G
+     * @return G
+     */
     public ECPoint getG()
     {
         return g;
     }
 
+    /**
+     * Get the curve coefficient a
+     * @return a
+     */
     public BigInteger getA()
     {
         return curve.getA().toBigInteger();
     }
 
+    /**
+     * Get the curve coefficient b
+     * @return b
+     */
     public BigInteger getB()
     {
         return curve.getB().toBigInteger();
     }
 
+    /**
+     * Get n, the order of the base point
+     * @return n
+     */
     public BigInteger getN()
     {
         return curve.getOrder();
     }
 
+    /**
+     * Get the co-factor h of the curve
+     * @return h
+     */
     public BigInteger getH()
     {
         return curve.getCofactor();
     }
 
+    /**
+     * Get the prime field modulus q of the curve
+     * @return q
+     */
     public BigInteger getQ()
     {
         return curve.getQ();

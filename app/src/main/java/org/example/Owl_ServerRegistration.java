@@ -112,7 +112,7 @@ public class Owl_ServerRegistration
      *
      * @param serverId unique identifier of this server.
      *                      The client and server in the exchange must NOT share the same id.
-     *                      See {@link Owl_Curves} for standard curves
+     * @param curve 		elliptic curve; see {@link Owl_Curves} for standard curves
      * @param digest        digest to use during zero knowledge proofs and key confirmation (SHA-256 or stronger preferred)
      * @param random        source of secure random data for x3 and x4, and for the zero knowledge proofs
      * @throws NullPointerException     if any argument is null
@@ -152,9 +152,10 @@ public class Owl_ServerRegistration
      * Receives the payload sent by the client as part of user registration, and stores necessary values in the server.
      * <p>
      * Must be called after {@link Owl_ClientRegistration#initiateUserRegistration()} by the {@link Owl_Client}.
-     * @param {@link userLoginRegistrationReceived}
+     * @param userLoginRegistrationReceived {@link Owl_InitialRegistration}
      * @return {@link Owl_FinishRegistration}
      * @throws IllegalStateException if this functions is called more than once.
+     * @throws CryptoException if validation of the payload fails
      */    
     public Owl_FinishRegistration registerUseronServer(
         Owl_InitialRegistration userLoginRegistrationReceived

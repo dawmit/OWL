@@ -24,14 +24,14 @@ public class Owl_FinishRegistration
     private final String clientId;
 
     /**
-     * The value g^x3.
+     * The value x3 * [G].
      */
     private final ECPoint gx3;
 
     /**
      * The zero knowledge proof for x3.
      * <p>
-     * This is a class {@link ECSchnorrZKP} with two fields, containing {g^v, r} for x3.
+     * This is a class {@link ECSchnorrZKP} with two fields, containing {v*[G], r} for x3.
      * </p>
      */
     private final ECSchnorrZKP knowledgeProofForX3;
@@ -42,12 +42,18 @@ public class Owl_FinishRegistration
     private final BigInteger pi;
 
     /**
-     * The value of T = g^t
+     * The value of T = t * [G]
      */
     private final ECPoint gt;
 
-
-
+    /**
+     * Constructor of Owl_FinishRegistration
+     * @param clientId The client identity (or username)
+     * @param knowledgeProofForX3 The zero-knowledge proof for the knowledge of x3 for X3
+     * @param gx3 The public key X3= [G] * x3
+     * @param pi pi = H(t) where t=H(username || password) mod n
+     * @param gt T = t * [G]
+     */
     public Owl_FinishRegistration(
         String clientId,
         ECSchnorrZKP knowledgeProofForX3,

@@ -35,6 +35,9 @@ public class Owl_Util
      * Return a value that can be used as x1, x2, x3 or x4 during round 1.
      * <p>
      * The returned value is a random value in the range <code>[1, n-1]</code>.
+     * @param n The order of the base point
+     * @param random SecureRandom
+     * @return A random value within [1, n-1]
      */
     public static BigInteger generateX1(
         BigInteger n,
@@ -46,8 +49,12 @@ public class Owl_Util
     }
 
     /**
-     * Calculate g^x as done in round 1.
-     * Also used to calculate T = G^t as seen in the initial user registration
+     * Calculate X = [G] * x as done in round 1.
+     * Also used to calculate T = [G] * t as seen in the initial user registration
+     * 
+     * @param g Base point G
+     * @param x Scalar x
+     * @return [G] * x
      */
     public static ECPoint calculateGx(
         ECPoint g,
@@ -57,7 +64,12 @@ public class Owl_Util
     }
 
     /**
-     * Calculate Galpha or Gbeta as done in the second pass of the protocol.
+     * Calculate the combined public key from three public keys
+     * 
+     * @param gx1 Public key X1
+     * @param gx3 Public key X3
+     * @param gx4 Public key X4
+     * @return 
      * @throws CryptoException  if any of the parameters are the infinity point on the elliptic curve.
      */
     public static ECPoint calculateGA(
@@ -66,25 +78,23 @@ public class Owl_Util
         ECPoint gx4)
     throws CryptoException
     {
-        if(gx1.isInfinity())
+    	ECPoint Gx = gx1.add(gx3).add(gx4);
+    	
+        if(Gx.isInfinity())
         {
-            throw new CryptoException("Gx1 cannot be infinity");
+            throw new CryptoException("The combined public key cannot be infinity");
         }
-        if(gx4.isInfinity())
-        {
-            throw new CryptoException("Gx2 cannot be infinity");
-        }
-        if(gx3.isInfinity())
-        {
-            throw new CryptoException("Gx3 cannot be infinity");
-        }
-        // ga = g^(x1+x3+x4) = g^x1 * g^x3 * g^x4 
-        return gx1.add(gx3).add(gx4);
+        return Gx;
     }
 
 
     /**
-     * Calculate x2 * pi as done in second pass of Owl.
+     * Calculate x2 * pi mod n as done in second pass of Owl.
+     * 
+     * @param n The order of the base point
+     * @param x2 The private key x2
+     * @param pi pi = H(t) mod n
+     * @return x2 * pi mod n
      */
     public static BigInteger calculateX2s(
         BigInteger n,
@@ -98,6 +108,12 @@ public class Owl_Util
     /**
      * Calculate alpha or beta as done in the second pass.
      */
+    /**
+     * Calculate the public key from a base point and a scalar
+     * @param gA Base point
+     * @param x2pi Scalar
+     * @return [gA] * x2pi
+     */
     public static ECPoint calculateA(
         ECPoint gA,
         BigInteger x2pi)
@@ -109,6 +125,12 @@ public class Owl_Util
     /**
      * Calculate t for the user's initial registration onto the server.
      * t is calculated by H(username||password) mod n
+     * 
+     * @param n The order of the base point
+     * @param string xxx
+     * @param digest Instance of Digest
+     * @return t = H(username||password) mod n
+     * @throws CryptoException if t = 0 mod n
      */
     public static BigInteger calculateT(
         BigInteger n,
@@ -123,6 +145,7 @@ public class Owl_Util
         }
         return t;
     }
+    
     /**
      *  Calculate pi for initial registration.
      * pi = H(t).mod(n)

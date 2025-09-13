@@ -27,14 +27,20 @@ public class Owl_InitialRegistration
      */
     private final String clientId;
     /**
-     * The value of pi = H(t), where t = H(Username||password) mod(n)
+     * The value of pi = H(t), where t = H(Username||password) mod n
      */
     private final BigInteger pi;
     /**
-     * The value of T = g^t
+     * The value of T = t * [G]
      */
     private final ECPoint gt;
 
+    /**
+     * Constructor of Owl_InitialRegistration
+     * @param clientId Client identity (or username)
+     * @param pi pi = H(t), where t = H(Username||password) mod(n)
+     * @param gt T = t * [G]
+     */
     public Owl_InitialRegistration(
         String clientId,
         BigInteger pi,
@@ -49,16 +55,28 @@ public class Owl_InitialRegistration
         this.gt = gt;
     }
 
+    /**
+     * Get the client identity (or username)
+     * @return The client identity
+     */
     public String getClientId()
     {
         return clientId;
     }
 
+    /**
+     * Get pi = H(t), where t = H(Username||password) mod(n)
+     * @return pi
+     */
     public BigInteger getPi()
     {
         return pi;
     }
 
+    /**
+     * Get T = t * [G]
+     * @return T
+     */
     public ECPoint getGt()
     {
         return gt;
