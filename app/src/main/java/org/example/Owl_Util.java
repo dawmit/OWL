@@ -274,7 +274,7 @@ public class Owl_Util
         BigInteger h = calculateHashForZeroknowledgeProof(generator, V, X, userID, digest);
 
         // First, ensure X is a valid public key
-        validatePublicKey(X, curve, q, BigInteger coFactor);
+        validatePublicKey(X, curve, q, coFactor);
         
         // Now check if V = G*r + X*h.
         // Given that {G, X} are valid points on the curve, the equality implies that V is also a point on the curve.
