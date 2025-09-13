@@ -23,14 +23,21 @@ public class ECSchnorrZKP
      */
     private final BigInteger r;
 
-    ECSchnorrZKP(ECPoint V, BigInteger r)
+    /**
+     * Constructor for ECSchnorrZKP
+     * 
+     * @param V Prover's commitment V = G x [v]
+     * @param r Prover's response r to a challenge c, r = v - d * c mod n
+     */
+    public ECSchnorrZKP(ECPoint V, BigInteger r)
     {
         this.V = V;
         this.r = r;
     }
 
     /**
-     * Returns the commitment (V = G x [v] where G is a base point on the elliptic curve and v is an ephemeral secret)
+     * Get the prover's commitment
+     * @return The prover's commitment, V = G x [v] where G is a base point on the elliptic curve and v is an ephemeral secret
      */
     public ECPoint getV()
     {
@@ -38,7 +45,8 @@ public class ECSchnorrZKP
     }
 
     /**
-     * Returns the prover's response to the challenge c (r = v - d * c mod n where d is the private key)
+     * Get the prover's response
+     * @return The prover's response r to the challenge c, r = v - d * c mod n where d is the prover's private key
      */
     public BigInteger getr()
     {

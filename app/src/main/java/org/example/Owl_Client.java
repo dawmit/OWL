@@ -298,6 +298,8 @@ public class Owl_Client
     /**
      * Gets the current state of this client.
      * See the <code>STATE_*</code> constants for possible values.
+     * 
+     * @return the state of the client
      */
     public int getState()
     {
@@ -309,6 +311,7 @@ public class Owl_Client
      * Must be called prior to {@link #authenticationFinish(Owl_AuthenticationServerResponse)}
      * After execution, the {@link #getState() state} will be  {@link #STATE_LOGIN_INITIALISED}.
      * 
+     * @return {@link Owl_AuthenticationInitiate}
      * @throws IllegalStateException if called multiple times.
      */
     public Owl_AuthenticationInitiate authenticationInitiate()
@@ -344,7 +347,8 @@ public class Owl_Client
      * After execution, the {@link #getState() state} will be  {@link #STATE_LOGIN_FINISHED}.
      * 
      * @param authenticationServerResponse  The payload sent by {@link Owl_Server#authenticationServerResponse(Owl_AuthenticationInitiate, Owl_FinishRegistration)} and to be validated.
-     *
+     * 
+     * @return {@link Owl_AuthenticationFinish}
      * @throws CryptoException       if validation fails.
      * @throws IllegalStateException if called prior to {@link #authenticationInitiate()} or called multiple times.
      */
@@ -417,6 +421,7 @@ public class Owl_Client
      * <p>
      * After execution, the {@link #getState() state} will be  {@link #STATE_KEY_CALCULATED}.
      *
+     * @return raw key material
      * @throws IllegalStateException if called prior to {@link #authenticationFinish(Owl_AuthenticationServerResponse)},
      *                               or if called multiple times.
      */
@@ -469,6 +474,7 @@ public class Owl_Client
      * <p>
      * After execution, the {@link #getState() state} will be {@link #STATE_KC_INITIALISED}.
      *
+     * @return {@link Owl_KeyConfirmation}
      * @param keyingMaterial            The keying material as returned from {@link #calculateKeyingMaterial()}.
      * @throws IllegalStateException    if called prior to {@link #calculateKeyingMaterial()}, or multiple times
      */

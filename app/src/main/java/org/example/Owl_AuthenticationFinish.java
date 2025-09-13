@@ -41,6 +41,13 @@ public class Owl_AuthenticationFinish
      */
     private final BigInteger r;
 
+    /**
+     * Constructor of Owl_AuthenticationFinish
+     * @param clientId Client's identity
+     * @param alpha The public key alpha sent by the client in the third pass
+     * @param knowledgeProofForAlpha The zero-knowledge proof for the knowledge of the private key for alpha
+     * @param r The response r for proving the knowledge of t=H(usrname||password) mod n. 
+     */
     public Owl_AuthenticationFinish(
         String clientId,
         ECPoint alpha,
@@ -57,22 +64,38 @@ public class Owl_AuthenticationFinish
         this.alpha = alpha;
         this.r = r;
     }
-
+    
+    /**
+     * Get the client's identity (also known as username)
+     * @return The client's identity
+     */
     public String getClientId()
     {
         return clientId;
     }
 
+    /**
+     * Get the public key alpha sent by the client in the third pass
+     * @return The public key alpha
+     */
     public ECPoint getAlpha()
     {
         return alpha;
     }
 
+    /**
+     * Get the response r as part of the zero-knowledge proof for proving the knowledge of t, r = x1 - t.h mod n where x1 is the ephemeral private key for the public key X1 sent in the first pass of Owl
+     * @return The response r sent by the client in the third pass
+     */
     public BigInteger getR()
     {
         return r;
     }
-
+    
+    /**
+     * Get the Schnorr zero-knowledge proof for the knowledge of the private key for the public key alpha 
+     * @return {@link ECSchnorrZKP}
+     */
     public ECSchnorrZKP getKnowledgeProofForAlpha()
     {
         return knowledgeProofForAlpha;

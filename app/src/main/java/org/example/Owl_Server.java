@@ -16,7 +16,6 @@ import org.bouncycastle.util.Exceptions;
  * A server in the Owl key exchange protocol.
  * <p>
  * See {@link Owl_Client} for more details about Owl.
- * <p>
  */ 
 public class Owl_Server
 {

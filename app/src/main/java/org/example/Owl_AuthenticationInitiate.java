@@ -46,7 +46,15 @@ public class Owl_AuthenticationInitiate
      * </p>
      */
     private final ECSchnorrZKP knowledgeProofForX2;
-
+    
+    /**
+     * Constructor of Owl_AuthenticationInitiate
+     * @param clientId the client's identity (or username)
+     * @param gx1 The public key Gx1 = x1 * [G]
+     * @param gx2 The public key Gx2 = x2 * [G]
+     * @param knowledgeProofForX1 The zero-knowledge proof for proving the knowledge of x1
+     * @param knowledgeProofForX2 The zero-knowledge proof for proving the knowledge of x2
+     */
     public Owl_AuthenticationInitiate(
         String clientId,
         ECPoint gx1,
@@ -67,26 +75,46 @@ public class Owl_AuthenticationInitiate
         this.knowledgeProofForX2 = knowledgeProofForX2;
     }
 
+    /**
+     * Get the client's identity (or username)
+     * @return The client's identity
+     */
     public String getClientId()
     {
         return clientId;
     }
 
+    /**
+     * Get the client's public key Gx1 = x1 * [G] in the first pass of Owl
+     * @return The client's public key Gx1 
+     */
     public ECPoint getGx1()
     {
         return gx1;
     }
 
+    /**
+     * Get the client's public key Gx2 = x2 * [G] in the first pass of Owl
+     * @return The client's public key Gx2 
+     */
     public ECPoint getGx2()
     {
         return gx2;
     }
 
+    /**
+     * Get the zero-knowledge proof for the knowledge of x1
+     * @return {@link ECSchnorrZKP}
+     */
     public ECSchnorrZKP getKnowledgeProofForX1()
     {
         return knowledgeProofForX1;
     }
 
+    /**
+     * Get the zero-knowledge proof for the knowledge of x2
+     * @return {@link ECSchnorrZKP}
+     */
     public ECSchnorrZKP getKnowledgeProofForX2()
     {
         return knowledgeProofForX2;
