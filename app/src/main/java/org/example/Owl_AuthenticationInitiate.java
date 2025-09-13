@@ -50,8 +50,8 @@ public class Owl_AuthenticationInitiate
     /**
      * Constructor of Owl_AuthenticationInitiate
      * @param clientId the client's identity (or username)
-     * @param gx1 The public key Gx1 = x1 * [G]
-     * @param gx2 The public key Gx2 = x2 * [G]
+     * @param gx1 The public key X1 = x1 * [G]
+     * @param gx2 The public key X2 = x2 * [G]
      * @param knowledgeProofForX1 The zero-knowledge proof for proving the knowledge of x1
      * @param knowledgeProofForX2 The zero-knowledge proof for proving the knowledge of x2
      */
@@ -85,8 +85,8 @@ public class Owl_AuthenticationInitiate
     }
 
     /**
-     * Get the client's public key Gx1 = x1 * [G] in the first pass of Owl
-     * @return The client's public key Gx1 
+     * Get the client's public key X1 = x1 * [G] in the first pass of Owl
+     * @return The client's public key X1 
      */
     public ECPoint getGx1()
     {
@@ -94,8 +94,8 @@ public class Owl_AuthenticationInitiate
     }
 
     /**
-     * Get the client's public key Gx2 = x2 * [G] in the first pass of Owl
-     * @return The client's public key Gx2 
+     * Get the client's public key X2 = x2 * [G] in the first pass of Owl
+     * @return The client's public key X2 
      */
     public ECPoint getGx2()
     {

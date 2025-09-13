@@ -202,6 +202,8 @@ public class Owl_Server
     /**
      * Gets the current state of this serve.
      * See the <code>STATE_*</code> constants for possible values.
+     * 
+     * @return The state of the server
      */
     public int getState()
     {
@@ -217,6 +219,7 @@ public class Owl_Server
      *
      * @param authenticationInitiate    payload sent by {@link Owl_Client#authenticationInitiate()} to be validated and used for further calculation.
      * @param userLoginCredentials      comes from the server where it stored the user login credentials as part of the user login registration.
+     * @return {@link Owl_AuthenticationServerResponse}
      * @throws CryptoException          if validation fails.
      * @throws IllegalStateException    if called multiple times.
      */
@@ -334,6 +337,7 @@ public class Owl_Server
      * <p>
      * After execution, the {@link #getState() state} will be  {@link #STATE_KEY_CALCULATED}.
      *
+     * @return The raw key material produced by the Owl key exchange process
      * @throws IllegalStateException if called prior to {@link #authenticationServerEnd(Owl_AuthenticationFinish)},
      *                               or if called multiple times.
      */
@@ -379,6 +383,7 @@ public class Owl_Server
      * After execution, the {@link #getState() state} will be  {@link #STATE_KC_INITIALISED}.
      *
      * @param keyingMaterial The keying material as returned from {@link #calculateKeyingMaterial()}.
+     * @return {@link Owl_KeyConfirmation}
      * @throws IllegalStateException if called prior to {@link #calculateKeyingMaterial()}, or multiple times
      */
     public Owl_KeyConfirmation initiateKeyConfirmation(BigInteger keyingMaterial)

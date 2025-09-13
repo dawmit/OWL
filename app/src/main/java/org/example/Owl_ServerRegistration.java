@@ -52,12 +52,13 @@ public class Owl_ServerRegistration
      * Checks if user registration is called more than once.
      */
     private boolean registrationState;
+    
     /**
      * Check's the status of the user registration
      * I.E. whether or not this server has registered a user already.
      * See the <code>REGSITRATION_*</code> constants for possible values.
+     * @return true if the user has been registered or false otherwise
      */
-
     public boolean getRegistrationState()
     {
         return this.registrationState;
@@ -148,11 +149,13 @@ public class Owl_ServerRegistration
      */
 
     /**
-     * Recieves the payload sent by the client as part of user registration, and stores necessary values away in the server (upto the user of this protocol).
+     * Receives the payload sent by the client as part of user registration, and stores necessary values in the server.
      * <p>
      * Must be called after {@link Owl_ClientRegistration#initiateUserRegistration()} by the {@link Owl_Client}.
+     * @param {@link userLoginRegistrationReceived}
+     * @return {@link Owl_FinishRegistration}
      * @throws IllegalStateException if this functions is called more than once.
-     */
+     */    
     public Owl_FinishRegistration registerUseronServer(
         Owl_InitialRegistration userLoginRegistrationReceived
         )

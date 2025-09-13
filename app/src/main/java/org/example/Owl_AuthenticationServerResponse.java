@@ -65,6 +65,16 @@ public class Owl_AuthenticationServerResponse
      */
     private final ECSchnorrZKP knowledgeProofForBeta;
 
+    /**
+     * Constructor for Owl_AuthenticationServerResponse
+     * @param serverId The server's identity
+     * @param gx3 The public key X3 = x3 * [G]
+     * @param gx4 The public key X4 = x4 * [G]
+     * @param knowledgeProofForX3 The zero-knowledge proof for the knowledge of x3
+     * @param knowledgeProofForX4 The zero-knowledge proof for the knowledge of x4 
+     * @param beta The public key beta = (x4 x pi) * [X1 + X2 + X3]
+     * @param knowledgeProofForBeta The zero-knowledge proof for the knowledge of (x4 x pi) for beta
+     */
     public Owl_AuthenticationServerResponse(
         String serverId,
         ECPoint gx3,
@@ -91,36 +101,64 @@ public class Owl_AuthenticationServerResponse
         this.knowledgeProofForBeta = knowledgeProofForBeta;
     }
 
+    /**
+     * Get the server's identity
+     * @return The server's identity
+     */
     public String getServerId()
     {
         return serverId;
     }
 
+    /**
+     * Get the public key X3 = x3 * [G]
+     * @return The public key X3
+     */
     public ECPoint getGx3()
     {
         return gx3;
     }
 
+    /**
+     * Get the public key X4 = x4 * [G]
+     * @return The public key X4
+     */
     public ECPoint getGx4()
     {
         return gx4;
     }
 
+    /**
+     * Get the zero-knowledge proof for the knowledge of x3 for X3 = x3 * [G]
+     * @return {@link ECSchnorrZKP}
+     */
     public ECSchnorrZKP getKnowledgeProofForX3()
     {
         return knowledgeProofForX3;
     }
 
+    /**
+     * Get the zero-knowledge proof for the knowledge of x4 for X4 = x4 * [G]
+     * @return {@link ECSchnorrZKP}
+     */
     public ECSchnorrZKP getKnowledgeProofForX4()
     {
         return knowledgeProofForX4;
     }
 
+    /**
+     * Get the public key beta = (x4 x pi) * [X1 + X2 + X3]
+     * @return The public key beta
+     */
     public ECPoint getBeta()
     {
         return beta;
     }
 
+    /**
+     * Get the zero-knowledge proof for the knowledge of (x4 x pi) for the public key beta = (x4 x pi) * [X1 + X2 + X3]
+     * @return {@link ECSchnorrZKP}
+     */
     public ECSchnorrZKP getKnowledgeProofForBeta()
     {
         return knowledgeProofForBeta;

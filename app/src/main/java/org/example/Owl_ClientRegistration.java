@@ -84,9 +84,10 @@ public class Owl_ClientRegistration{
      */
     private boolean registrationState;
     /**
-     * Check's the status of the user registration
+     * Get the status of the user registration
      * I.E. whether or not this server has registered a user already.
      * See the <code>REGSITRATION_*</code> constants for possible values.
+     * @return True if the user has been registered or false otherwise
      */
     public boolean getRegistrationState()
     {
@@ -209,6 +210,7 @@ public class Owl_ClientRegistration{
      * MUST be sent over a secure channel.
      * <p>
      * Must be called prior to {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)}
+     * @return {@link Owl_InitialRegistration}
      * @throws IllegalStateException if this function is called more than once
      */
     public Owl_InitialRegistration initiateUserRegistration()
