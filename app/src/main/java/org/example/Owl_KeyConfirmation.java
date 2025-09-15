@@ -32,17 +32,30 @@ public class Owl_KeyConfirmation
      */
     private final BigInteger macTag;
 
+    /**
+     * Constructor of Owl_KeyConfirmation
+     * @param id The identity of the prover
+     * @param magTag The key confirmation string
+     */
     public Owl_KeyConfirmation(String id, BigInteger magTag)
     {
         this.id = id;
         this.macTag = magTag;
     }
 
+    /**
+     * Get the identity of the prover
+     * @return The identity of the prover
+     */
     public String getId()
     {
         return id;
     }
 
+    /**
+     * Get the MAC tag which serves as a key confirmation string
+     * @return The MAC tag
+     */
     public BigInteger getMacTag()
     {
         return macTag;

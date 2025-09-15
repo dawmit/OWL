@@ -73,27 +73,47 @@ public class Owl_FinishRegistration
         this.pi = pi;
         this.gt = gt;
     }
-
+    
+    /**
+     * Get the client identity
+     * @return The client identity
+     */
     public String getClientId()
     {
         return clientId;
     }
 
+    /**
+     * Get pi = H(t), where t = H(Username||password) mod(n)
+     * @return pi
+     */
     public BigInteger getPi()
     {
         return pi;
     }
 
+    /**
+     * Get T = t * [G]
+     * @return T
+     */
     public ECPoint getGt()
     {
         return gt;
     }
 
+    /**
+     * Get X3 = x3 * [G]
+     * @return X3
+     */
     public ECPoint getGx3()
     {
         return gx3;
     }
 
+    /**
+     * Get the zero-knowledge proof for the knowledge of x3 for X3 = x3 * [G] 
+     * @return {@link ECSchnorrZKP}
+     */
     public ECSchnorrZKP getKnowledgeProofForX3()
     {
         return knowledgeProofForX3;

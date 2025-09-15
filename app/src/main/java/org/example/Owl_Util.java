@@ -64,12 +64,12 @@ public class Owl_Util
     }
 
     /**
-     * Calculate the combined public key from three public keys
+     * Calculate the combined public key GA = X1 * X3 * X4 from three public keys X1, X3 and X4. 
      * 
      * @param gx1 Public key X1
      * @param gx3 Public key X3
      * @param gx4 Public key X4
-     * @return 
+     * @return The combined public key
      * @throws CryptoException  if any of the parameters are the infinity point on the elliptic curve.
      */
     public static ECPoint calculateGA(
@@ -147,8 +147,13 @@ public class Owl_Util
     }
     
     /**
-     *  Calculate pi for initial registration.
-     * pi = H(t).mod(n)
+     *  Calculate pi = H(t) mod(n) for initial registration.
+     * 
+     * @param n The order of the base point
+     * @param t t = H(username||password) mod n
+     * @param digest Instance of a one-way hash
+     * @return pi
+     * @throws CryptoException When pi = 0 mod n
      */
     public static BigInteger calculatePi(
         BigInteger n,
@@ -164,7 +169,16 @@ public class Owl_Util
     }
     /**
      * Calculate a zero-knowledge proof of x using Schnorr's signature.
-     * The returned object has two fields {g^v, r = v-x*h} for x.
+     * The returned object has two fields {V = [G] * v, r = v-x*h} for x.
+     * 
+     * @param generator The base point on the curve
+     * @param n The order of the base point
+     * @param x The private key
+     * @param X The public key
+     * @param digest Instance of a one-way hash
+     * @param userID The identity of the prover
+     * @param random Instance of a secure random number generator
+     * @return {@link ECSchnorrZKP}
      */
     public static ECSchnorrZKP calculateZeroknowledgeProof(
         ECPoint generator,
@@ -277,8 +291,18 @@ public class Owl_Util
      * {@link #calculateZeroknowledgeProof(ECPoint, BigInteger, BigInteger, ECPoint, Digest, String, SecureRandom)})
      * is correct.
      *
-     * @throws CryptoException if the zero-knowledge proof is not correct
+     * @param generator The base point on the curve
+     * @param X The public key
+     * @param zkp The zero-knowledge proof {@link ECSchnorrZKP}
+     * @param q The prime modulus for the coordinates
+     * @param n The oder of the base point
+     * @param curve The elliptic curve
+     * @param coFactor The co-factor
+     * @param userID The identity of the prover
+     * @param digest Instance of a one-way hash
+     * @throws CryptoException If the zero-knowledge proof is not correct
      */
+    
     public static void validateZeroknowledgeProof(
         ECPoint generator,
         ECPoint X,
@@ -312,6 +336,8 @@ public class Owl_Util
      * Validates that the given participant ids are not equal.
      * (For the Owl exchange, each participant must use a unique id.)
      *
+     * @param participantId1 The identity of the first participant
+     * @param participantId2 The identity of the second participate
      * @throws CryptoException if the participantId strings are equal.
      */
     public static void validateParticipantIdsDiffer(
@@ -333,7 +359,10 @@ public class Owl_Util
      * Validates that the given participant ids are equal.
      * This is used to ensure that the payloads received from
      * each round all come from the same participant (client/server).
-     *
+     * 
+     * @param expectedParticipantId The expected participant's identity
+     * @param actualParticipantId The actual participate's identity
+
      * @throws CryptoException if the participantId strings are equal.
      */
     public static void validateParticipantIdsEqual(
@@ -377,6 +406,12 @@ public class Owl_Util
      * <pre>
      * KeyingMaterial = (Beta/g^{x2*x4*s})^x2pis
      * </pre>
+     * 
+     * @param gx4 Public key X4 = x4 * [G]
+     * @param x2 Private key x2
+     * @param x2pi Private key x2*pi
+     * @param B The public Beta key received from the server in the second pass
+     * @return Raw key material K = [Beta - [X4] * x2pi] * x2)
      */
     public static ECPoint calculateKeyingMaterial(
         ECPoint gx4,
@@ -384,16 +419,34 @@ public class Owl_Util
         BigInteger x2pi,
         ECPoint B)
     {
-        return B.subtract(gx4.multiply(x2pi)).multiply(x2);
+        return B.subtract(gx4.multiply(x2pi)).multiply(x2);        
     }
 
     /**
-     * Calculates the 'transcipt' which is, in order, everything communicated between the two parties
+     * Calculates the 'transcript' which is, in order, everything communicated between the two parties
      * in the login authentication protocol used to compute a common session key. 
-     * Transcript is required for the caluclation of r, as a compiler is used
-     * to prove the knowledge of t in an assymetric setting.
+     * Transcript is required for the calculation of r, as a compiler is used
+     * to prove the knowledge of t in an asymmetric setting.
      * For more information: <a href= "https://eprint.iacr.org/2023/768.pdf"> Owl: An Augmented Password-Authenticated 
      * Key Exchange Scheme </a>
+     * 
+     * @param rawKey Raw key material
+     * @param clientId Client identity
+     * @param gx1 Public key X1
+     * @param gx2 Public key X2
+     * @param knowledgeProofX1 Zero-knowledge proof for X1
+     * @param knowledgeProofX2 Zero-knowledge proof for X2
+     * @param serverId Server identity
+     * @param gx3 Public key X3
+     * @param gx4 Public key X4 
+     * @param knowledgeProofX3 Zero-knowledge proof for X3
+     * @param knowledgeProofX4 Zero-knowledege proof for X4
+     * @param beta Public key Beta
+     * @param knowledgeProofBeta Zero-knowledge proof for Beta
+     * @param alpha Public key Alpha
+     * @param knowledgeProofAlpha Zero-knowledge proof for Alpha
+     * @param digest Instance of MAC
+     * @return Transcript
      */
     public static BigInteger calculateTranscript(
         ECPoint rawKey,
@@ -444,7 +497,13 @@ public class Owl_Util
     }
 
     /**
-     * Calculates r = x1 - t - h mod n, where h is the hashed key+transcipt.
+     * Calculates r = x1 - t * h mod n, where h is the hashed key+transcript.
+     * 
+     * @param x1 Private key x1
+     * @param t t = H(username||password) mod n
+     * @param hTranscript Transcript 
+     * @param n Order of the base point
+     * @return r
      */
     public static BigInteger calculateR(
         BigInteger x1, 
@@ -456,7 +515,14 @@ public class Owl_Util
     }
 
     /**
-     * Validates r my checking g^r . Gt^h equals gx1
+     * Validates r by checking [g] * r + [T] * h equals X1
+     * 
+     * @param r The client response r
+     * @param gx1 Public key X1
+     * @param h Transcript
+     * @param gt Password verifier T
+     * @param g Base point
+     * @param n order of the base point
      * @throws CryptoException  if the validation fails i.e the values do not equal.
      */
     public static void validateR(
@@ -475,18 +541,29 @@ public class Owl_Util
     }
 
     /**
-     * Derives a KC key from the raw {@link ECPoint} key 
+     * Derives a raw KC key from the raw {@link ECPoint} key 
      * and returns a {@link BigInteger}. 
      * This is not a key derivation function used to derive a session key, although it can be used that way.
      * It is used specifically during explicit key confirmation.
+     * 
+     * @param rawKey A point on curve as raw key material
+     * @return The x coordinate of the point
+     * TODO: FH double check 
      */
     public static BigInteger deriveKCKey(ECPoint rawKey)
     {
         rawKey = rawKey.normalize();
         return rawKey.getAffineXCoord().toBigInteger();
     }
+    
     /**
      * Validates that an EC point X is a valid public key on the designated elliptic curve.
+     * 
+     * @param X Public key 
+     * @param curve Elliptic curve
+     * @param q Prime field for the coordinates
+     * @param coFactor Co-factor
+     * @throws CryptoException if the public key validation fails
      */
     public static void validatePublicKey(ECPoint X, ECCurve curve, BigInteger q, BigInteger coFactor) throws CryptoException{
         
@@ -547,6 +624,16 @@ public class Owl_Util
      * MacOutputBits = MacTagBits, hence truncation function omitted.
      * MacLen = length of MacTag
      * </pre>
+     * 
+     * @param participantId Participant's identity
+     * @param partnerParticipantId The other participant's identity
+     * @param gx1 Public key X1
+     * @param gx2 Public key X2
+     * @param gx3 Public key X3
+     * @param gx4 Public key X4
+     * @param keyingMaterial Keying material
+     * @param digest Instance of a one-way hash
+     * @return MacTag for key confirmation
      */
     public static BigInteger calculateMacTag(
         String participantId,
@@ -590,6 +677,10 @@ public class Owl_Util
      * <pre>
      * MacKey = H(K || "Owl_KC")
      * </pre>
+     * 
+     * @param keyingMaterial Keying material K
+     * @param digest Instance of a one-way hash
+     * @return H(K || "Owl_KC")
      */
     private static byte[] calculateMacKey(
         BigInteger keyingMaterial,
@@ -612,8 +703,16 @@ public class Owl_Util
     /**
      * Validates the MacTag received from the partner participant.
      *
-     * @param partnerMacTag the MacTag received from the partner.
-     * @throws CryptoException if the participantId strings are equal.
+     * @param participantId The participant's identity
+     * @param partnerParticipantId The other participant's identity
+     * @param gx1 Public key X1
+     * @param gx2 Public key X2
+     * @param gx3 Public key X3
+     * @param gx4 Public key X4
+     * @param keyingMaterial Keying material
+     * @param digest Instance of a one-way hash
+     * @param partnerMacTag The MacTag received from the partner.
+     * @throws CryptoException if the participantId strings are equal
      */
     public static void validateMacTag(
         String participantId,
