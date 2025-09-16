@@ -36,8 +36,8 @@ public class ECSchnorrZKP
     }
 
     /**
-     * Get the prover's commitment
-     * @return The prover's commitment, V = G x [v] where G is a base point on the elliptic curve and v is an ephemeral secret
+     * Get the prover's commitment V = G x [v] where G is a base point on the elliptic curve and v is an ephemeral secret
+     * @return The prover's commitment
      */
     public ECPoint getV()
     {
@@ -45,8 +45,8 @@ public class ECSchnorrZKP
     }
 
     /**
-     * Get the prover's response
-     * @return The prover's response r to the challenge c, r = v - d * c mod n where d is the prover's private key
+     * Get the prover's response r to the challenge c, r = v - d * c mod n where d is the prover's private key
+     * @return The prover's response 
      */
     public BigInteger getr()
     {

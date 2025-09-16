@@ -13,7 +13,7 @@ import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Exceptions;
 
 /**
- * A server in the Owl key exchange protocol.
+ * A server in the Elliptic Curve Owl key exchange protocol.
  * <p>
  * See {@link Owl_Client} for more details about Owl.
  */ 
@@ -200,7 +200,7 @@ public class Owl_Server
     }
 
     /**
-     * Gets the current state of this serve.
+     * Gets the current state of this server.
      * See the <code>STATE_*</code> constants for possible values.
      * 
      * @return The state of the server
@@ -267,13 +267,14 @@ public class Owl_Server
     }
 
     /**
-     * Validates the payload received from the client during the second pass of the Owl protocol.
+     * Validates the payload received from the client during the third pass of the Owl protocol.
      * <p>
      * Note that this DOES NOT detect a non-common password.
      * The only indication of a non-common password is through derivation
      * of different keys (which can be detected explicitly by executing key confirmation)
      * or through the failure of validation of r (checks that g^r . T^h = gx1) in {@link Owl_Server#authenticationServerEnd}.
      * <p>
+     * TODO: FH double check
      * Must be called prior to {@link #calculateKeyingMaterial()}.
      * <p>
      * After execution, the {@link #getState() state} will be {@link #STATE_LOGIN_FINISHED}.
@@ -326,12 +327,10 @@ public class Owl_Server
      * sent to the server by the client during user registration.
      * Therefore, if you immediately start using a key derived from
      * the keying material, then you must handle detection of incorrect keys.
-     * Validation of R also detects if passwords are different between user registration and user login.
-     * If you want to handle this detection explicitly, you can perform explicit
+     * Validation of the r value also detects if passwords are different between user registration and user login.
+     * If you want to check the equality of the key materials derived at the two sides explicitly, you can perform explicit
      * key confirmation.  See {@link Owl_Server} for details on how to execute
      * key confirmation.
-     * <p>
-     * The keying material will be in the range <code>[0, n-1]</code>.
      * <p>
      * {@link #authenticationServerEnd(Owl_AuthenticationFinish)} must be called prior to this method.
      * <p>
@@ -378,7 +377,7 @@ public class Owl_Server
     /**
      * Creates and returns the payload to send to the client as part of Key Confirmation.
      * <p>
-     * See {@link Owl_Server} for more details on Key Confirmation.
+     * See {@link Owl_Client} for more details on Key Confirmation.
      * <p>
      * After execution, the {@link #getState() state} will be  {@link #STATE_KC_INITIALISED}.
      *
@@ -415,7 +414,7 @@ public class Owl_Server
     /**
      * Validates the payload received from the client as part of Key Confirmation.
      * <p>
-     * See {@link Owl_Server} for more details on Key Confirmation.
+     * See {@link Owl_Client} for more details on Key Confirmation.
      * <p>
      * After execution, the {@link #getState() state} will be {@link #STATE_KC_VALIDATED}.
      *

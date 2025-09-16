@@ -34,8 +34,8 @@ import org.bouncycastle.util.Exceptions;
  * <p>
  * Call the following methods in this order, the client initiates every exchange.
  * <ul>
- * <li> {@link Owl_ClientRegistration#initiateUserRegistration()} - send payload to the server over a secure channel. </li>
- * <li> {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)} - use the payload received from the client to calculate a secret payload that is to be safely stored by the user of this protocol.</li>
+ * <li> {@link Owl_ClientRegistration#initiateUserRegistration()} - The client sends payload to the server over a secure channel. </li>
+ * <li> {@link Owl_ServerRegistration#registerUseronServer(Owl_InitialRegistration)} - The server uses the payload received from the client to calculate a user credential payload that is to be safely stored on the server.</li>
  * </ul>
  * <p>
  * This class is stateful and NOT threadsafe.
