@@ -84,7 +84,7 @@ public class Owl_ClientRegistration{
      */
     private boolean registrationState;
     /**
-     * Get the status of the user registration
+     * Get the status of the user registration. 
      * I.E. whether or not this server has registered a user already.
      * See the <code>REGSITRATION_*</code> constants for possible values.
      * @return True if the user has been registered or false otherwise

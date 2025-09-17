@@ -3,7 +3,7 @@ package org.example;
 import java.math.BigInteger;
 
 /**
- * The payload sent/received during the optional explicit key confirmation stage of the protocol,
+ * The payload sent/received during the explicit key confirmation stage of the protocol,
  * <p>
  * Both {@link Owl_Client} and {@link Owl_Server} create and send an instance
  * of this payload to the other.
@@ -34,7 +34,7 @@ public class Owl_KeyConfirmation
 
     /**
      * Constructor of Owl_KeyConfirmation
-     * @param id The identity of the prover
+     * @param id The identity of the sender
      * @param magTag The key confirmation string
      */
     public Owl_KeyConfirmation(String id, BigInteger magTag)
@@ -44,8 +44,8 @@ public class Owl_KeyConfirmation
     }
 
     /**
-     * Get the identity of the prover
-     * @return The identity of the prover
+     * Get the identity of the sender
+     * @return The identity of the sender
      */
     public String getId()
     {

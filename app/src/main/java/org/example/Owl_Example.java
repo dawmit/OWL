@@ -84,16 +84,16 @@ public class Owl_Example {
         System.out.println("************ User Registration **************");
         System.out.println("Client sends to Server: ");
         System.out.println("Username used to register = " + clientUserRegistration.getClientId());
-        System.out.println("pi = " + clientUserRegistration.getPi().toString(16));
-        System.out.println("g^{t}=" + new BigInteger(clientUserRegistration.getGt().getEncoded(true)).toString(16));
+        System.out.println("pi=" + clientUserRegistration.getPi().toString(16));
+        System.out.println("T=" + new BigInteger(clientUserRegistration.getGt().getEncoded(true)).toString(16));
         System.out.println("");
 
         System.out.println("Server stores internally: ");
         System.out.println("Username used to register = " + serverUserRegistration.getClientId());
    	    System.out.println("KP{x3}: {V="+new BigInteger(serverUserRegistration.getKnowledgeProofForX3().getV().getEncoded(true)).toString(16)+"; r="+serverUserRegistration.getKnowledgeProofForX3().getr().toString(16)+"}");
-        System.out.println("g^{x3}=" + new BigInteger(serverUserRegistration.getGx3().getEncoded(true)).toString(16));
-        System.out.println("pi = " + serverUserRegistration.getPi().toString(16));
-        System.out.println("g^{t}=" + new BigInteger(serverUserRegistration.getGt().getEncoded(true)).toString(16));
+        System.out.println("X3=" + new BigInteger(serverUserRegistration.getGx3().getEncoded(true)).toString(16));
+        System.out.println("pi=" + serverUserRegistration.getPi().toString(16));
+        System.out.println("T=" + new BigInteger(serverUserRegistration.getGt().getEncoded(true)).toString(16));
         System.out.println("");
 
         /*
@@ -106,8 +106,8 @@ public class Owl_Example {
         System.out.println("************ First Pass ************");
         System.out.println("Client sends to server: ");
         System.out.println("Username used to login: " + clientLoginStart.getClientId());
-        System.out.println("g^{x1}=" + new BigInteger(clientLoginStart.getGx1().getEncoded(true)).toString(16));
-        System.out.println("g^{x2}=" + new BigInteger(clientLoginStart.getGx2().getEncoded(true)).toString(16));
+        System.out.println("X1=" + new BigInteger(clientLoginStart.getGx1().getEncoded(true)).toString(16));
+        System.out.println("X2=" + new BigInteger(clientLoginStart.getGx2().getEncoded(true)).toString(16));
         System.out.println("KP{x1}: {V=" + new BigInteger(clientLoginStart.getKnowledgeProofForX1().getV().getEncoded(true)).toString(16) + "; r=" + clientLoginStart.getKnowledgeProofForX1().getr().toString(16) + "}");
         System.out.println("KP{x2}: {V=" + new BigInteger(clientLoginStart.getKnowledgeProofForX2().getV().getEncoded(true)).toString(16) + "; r=" + clientLoginStart.getKnowledgeProofForX2().getr().toString(16) + "}");
         System.out.println("");
@@ -126,8 +126,8 @@ public class Owl_Example {
         System.out.println("Server verifies the client's KP{x2}: OK\n");
         System.out.println("Server sends to Client: ");
         System.out.println("Server's unique ID: " + serverLoginResponse.getServerId());
-        System.out.println("g^{x3}=" + new BigInteger(serverLoginResponse.getGx3().getEncoded(true)).toString(16));
-        System.out.println("g^{x4}=" + new BigInteger(serverLoginResponse.getGx4().getEncoded(true)).toString(16));
+        System.out.println("X3=" + new BigInteger(serverLoginResponse.getGx3().getEncoded(true)).toString(16));
+        System.out.println("X4=" + new BigInteger(serverLoginResponse.getGx4().getEncoded(true)).toString(16));
         System.out.println("KP{x3}: {V=" + new BigInteger(serverLoginResponse.getKnowledgeProofForX3().getV().getEncoded(true)).toString(16) + "; r=" + serverLoginResponse.getKnowledgeProofForX3().getr().toString(16) + "}");
         System.out.println("KP{x4}: {V=" + new BigInteger(serverLoginResponse.getKnowledgeProofForX4().getV().getEncoded(true)).toString(16) + "; r=" + serverLoginResponse.getKnowledgeProofForX4().getr().toString(16) + "}");
     	System.out.println("Beta="+new BigInteger(serverLoginResponse.getBeta().getEncoded(true)).toString(16));
@@ -171,7 +171,7 @@ public class Owl_Example {
         System.out.println("********* Fourth Pass ***********");
         server.authenticationServerEnd(clientLoginEnd);
         System.out.println("Server verifies the client's KP{Alpha}: OK");
-        System.out.println("Server verifies the client's r, {by checking g^r . T^h = gx1}: OK\n");
+        System.out.println("Server verifies the client's r: OK\n");
         
         /*
          * The server computes the keying material.
@@ -202,10 +202,8 @@ public class Owl_Example {
         BigInteger clientKey = deriveSessionKey(clientKeyingMaterial);
         BigInteger serverKey = deriveSessionKey(serverKeyingMaterial);
         
-        System.out.println();
-        System.out.println("The client and the server has done authenticated key exchange with explicit key confirmation.");
         System.out.println("Client's session key \t clientKey=" + clientKey.toString(16));
-        System.out.println("Server's session key \t Server=" + serverKey.toString(16));
+        System.out.println("Server's session key \t ServerKey=" + serverKey.toString(16));
     }
 
     private static BigInteger deriveSessionKey(BigInteger keyingMaterial)

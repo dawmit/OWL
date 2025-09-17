@@ -472,7 +472,7 @@ public class Owl_Client
     }
 
     /**
-     * Creates and returns the payload to send to the client as part of Key Confirmation.
+     * Creates and returns the payload to send to the server as part of Key Confirmation.
      * <p>
      * See {@link Owl_Client} for more details on Key Confirmation.
      * <p>
@@ -509,7 +509,7 @@ public class Owl_Client
     }
 
     /**
-     * Validates the key confirmation payload received by the client.
+     * Validates the key confirmation payload received by the server.
      * <p>
      * See {@link Owl_Client} for more details on Key Confirmation.
      * <p>
@@ -562,6 +562,7 @@ public class Owl_Client
         try 
         {
         	// t = H(username||password). Prepend each item with its byte length (int) to set clear boundary
+        	// TODO FH: double check
             return Owl_Util.calculateT(n, 
             		String.valueOf(clientId.getBytes().length) + clientId + 
             		String.valueOf(password.length) + new String(password), digest);
