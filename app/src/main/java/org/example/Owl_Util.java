@@ -75,15 +75,24 @@ public class Owl_Util
     public static ECPoint calculateGA(
         ECPoint gx1,
         ECPoint gx3,
-        ECPoint gx4)
-    throws CryptoException
-    {
-    	ECPoint Gx = gx1.add(gx3).add(gx4);
-    	
-        if(Gx.isInfinity())
-        {
+        ECPoint gx4) throws CryptoException {
+
+        if (gx1.isInfinity()) {
+            throw new CryptoException("Public key X1 cannot be infinity");
+        }
+        if (gx3.isInfinity()) {
+            throw new CryptoException("Public key X3 cannot be infinity");
+        }
+        if (gx4.isInfinity()) {
+            throw new CryptoException("Public key X4 cannot be infinity");
+        }
+
+        ECPoint Gx = gx1.add(gx3).add(gx4);
+
+        if (Gx.isInfinity()) {
             throw new CryptoException("The combined public key cannot be infinity");
         }
+
         return Gx;
     }
 
