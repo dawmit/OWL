@@ -351,8 +351,7 @@ public class Owl_Server
             throw new IllegalStateException("Server must validate client's final payload prior to creating key for " + serverId);
         }
 
-        BigInteger keyingMaterial = Owl_Util.deriveKCKey(rawKey);
-
+        BigInteger keyingMaterial = rawKey.normalize().getAffineXCoord().toBigInteger();
         /*
          * Clear the ephemeral private key fields as well.
          * Note that we're relying on the garbage collector to do its job to clean these up.

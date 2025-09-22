@@ -548,22 +548,6 @@ public class Owl_Util
             throw new CryptoException("Verification for r failed, g^r . T^h = X1 must be true");
         }
     }
-
-    /**
-     * Derives a raw KC key from the raw {@link ECPoint} key 
-     * and returns a {@link BigInteger}. 
-     * This is not a key derivation function used to derive a session key, although it can be used that way.
-     * It is used specifically during explicit key confirmation.
-     * 
-     * @param rawKey A point on curve as raw key material
-     * @return The x coordinate of the point
-     * TODO: FH double check 
-     */
-    public static BigInteger deriveKCKey(ECPoint rawKey)
-    {
-        rawKey = rawKey.normalize();
-        return rawKey.getAffineXCoord().toBigInteger();
-    }
     
     /**
      * Validates that an EC point X is a valid public key on the designated elliptic curve.

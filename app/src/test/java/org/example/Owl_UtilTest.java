@@ -89,7 +89,7 @@ public class Owl_UtilTest
         ECPoint alpha = Owl_Util.calculateA(alphaG, x2pi);
         ECPoint rawKey = Owl_Util.calculateKeyingMaterial(gx2, x4, x4pi, alpha);
 
-        BigInteger keyingMaterial = Owl_Util.deriveKCKey(rawKey);
+        BigInteger keyingMaterial = rawKey.normalize().getAffineXCoord().toBigInteger();
 
         BigInteger macTag = Owl_Util.calculateMacTag(
             "serverId", "clientId", gx3, gx4, gx1, gx2, keyingMaterial, digest
