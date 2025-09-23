@@ -268,13 +268,6 @@ public class Owl_Server
 
     /**
      * Validates the payload received from the client during the third pass of the Owl protocol.
-     * <p>
-     * Note that this DOES NOT detect a non-common password.
-     * The only indication of a non-common password is through derivation
-     * of different keys (which can be detected explicitly by executing key confirmation)
-     * or through the failure of validation of r (checks that g^r . T^h = gx1) in {@link Owl_Server#authenticationServerEnd}.
-     * <p>
-     * TODO: FH double check
      * Must be called prior to {@link #calculateKeyingMaterial()}.
      * <p>
      * After execution, the {@link #getState() state} will be {@link #STATE_LOGIN_FINISHED}.

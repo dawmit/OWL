@@ -413,13 +413,13 @@ public class Owl_Util
      * A session key must be derived from this key material using a secure key derivation function (KDF).
      * The KDF used to derive the key is handled externally (i.e. not by {@link Owl_Server} or {@link Owl_Client}).
      * <pre>
-     * KeyingMaterial = (Beta/g^{x2*x4*s})^x2pis
+     * KeyingMaterial = [Beta - [X4] * x2pi] * x2
      * </pre>
      * 
      * @param gx4 Public key X4 = x4 * [G]
      * @param x2 Private key x2
      * @param x2pi Private key x2*pi
-     * @param B The public Beta key received from the server in the second pass
+     * @param B The public key Beta 
      * @return Raw key material K = [Beta - [X4] * x2pi] * x2)
      */
     public static ECPoint calculateKeyingMaterial(

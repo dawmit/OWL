@@ -562,7 +562,6 @@ public class Owl_Client
         try 
         {
         	// t = H(username||password). Prepend each item with its byte length (int) to set clear boundary
-        	// TODO FH: double check
             return Owl_Util.calculateT(n, 
             		String.valueOf(clientId.getBytes().length) + clientId + 
             		String.valueOf(password.length) + new String(password), digest);
