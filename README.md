@@ -95,3 +95,6 @@ Now call the following methods in this order:
   If there are no errors, then the keys are a match! Using you're own KDF you can derive a session key from the `clientKeyingMaterial` and `serverKeyingMaterial`.
 
   The password update functionality is to be handled externally at the application layer.
+
+### Contribution
+  Thank you to Prof. Hao Feng from Warwick University, Department of Computer Science for helping building and overseeing this implementation.
