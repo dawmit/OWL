@@ -97,4 +97,4 @@ Now call the following methods in this order:
   The password update functionality is to be handled externally at the application layer.
 
 ### Contribution
-  Thank you to Prof. Hao Feng from Warwick University, Department of Computer Science for helping building and overseeing this implementation.
+  Thank you to Prof. Hao Feng from Warwick University, Department of Computer Science for helping build and overseeing this implementation.
